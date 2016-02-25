@@ -18,14 +18,14 @@ type setupStruct struct {
 	Config
 
 	MgoDB   *mongodb.Instance
-	MySQL *mysqldb.Instance
+//	MySQL *mysqldb.Instance
 	Handler http.Handler
 }
 
 func setup(cfg Config) *setupStruct {
 	s := &setupStruct{Config: cfg}
-//	s.setupMongo()
-	s.setUpMySql()
+	s.setupMongo()
+//	s.setUpMySql()
 	s.setupRoutes()
 	return s
 }
@@ -46,22 +46,22 @@ func (s *setupStruct) setupMongo() {
 	s.MgoDB = mgoIns
 }
 
-func (s *setupStruct) setUpMySql() {
-	cfg := s.Config
-
-	mySqlIns, err := mysqldb.NewInstance(mysqldb.ConnectOpt{
-		UserName: cfg.MySQL.UserName,
-		Password:cfg.MySQL.Password,
-		Host:cfg.MySQL.Host,
-		Database:cfg.MySQL.Database,
-	})
-
-	if err != nil {
-		log.Println("Cannot connect mySQL DB: error ", err)
-	}
-
-	s.MySQL = mySqlIns
-}
+//func (s *setupStruct) setUpMySql() {
+//	cfg := s.Config
+//
+//	mySqlIns, err := mysqldb.NewInstance(mysqldb.ConnectOpt{
+//		UserName: cfg.MySQL.UserName,
+//		Password:cfg.MySQL.Password,
+//		Host:cfg.MySQL.Host,
+//		Database:cfg.MySQL.Database,
+//	})
+//
+//	if err != nil {
+//		log.Println("Cannot connect mySQL DB: error ", err)
+//	}
+//
+//	s.MySQL = mySqlIns
+//}
 
 
 func (s *setupStruct) setupRoutes() {
@@ -70,7 +70,7 @@ func (s *setupStruct) setupRoutes() {
 		return xhttp.Adapt(h)
 	}
 
-	s.MySQL.Test()
+//	s.MySQL.Test()
 
 	router := httprouter.New()
 
