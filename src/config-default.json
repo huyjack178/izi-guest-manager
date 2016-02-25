@@ -1,0 +1,21 @@
+{
+	"server": {
+		"API_PORT": "8001",
+		"API_ADDR": ""
+	},
+
+	"mongodb" : {
+		"MONGODB_PORT": "27017",
+		"MONGODB_ADDR": "127.0.0.1",
+		"MONGODB_DBNAME": "iziDB",
+		"MONGODB_COLLECTIONS": {"GUEST": "guest"}
+	},
+
+	"mysql": {
+      "MYSQL_USERNAME": "b6_17335320",
+      "MYSQL_DATABASE": "b6_17335320_izidb",
+      "MYSQL_PASSWORD": "123456789",
+      "MYSQL_HOST": "sql202.byethost6.com:3306"
+    }
+}
+

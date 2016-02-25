@@ -1,0 +1,580 @@
+!<arch>
+__.PKGDEF       0           0     0     644     69536     `
+go object darwin amd64 go1.5.3 X:none
+build id "23f84c784dc3f6b785c47d94ee27cba630a0ce0a"
+
+$$
+package store
+	import runtime "runtime"
+	import mongodb "util/mongodb"
+	import bson "gopkg.in/mgo.v2/bson"
+	import logs "util/logs"
+	import model "model"
+	type @"util/mongodb".ConnectOpt struct { Address string; Port string; Database string; Collections map[string]string }
+	import mgo "gopkg.in/mgo.v2" // indirect
+	import sync "sync" // indirect
+	type @"sync".Mutex struct { @"sync".state int32; @"sync".sema uint32 }
+	func (@"sync".mÂ·1 *@"sync".Mutex) Lock ()
+	func (@"sync".mÂ·1 *@"sync".Mutex) Unlock ()
+	type @"sync".Locker interface { Lock(); Unlock() }
+	type @"sync".RWMutex struct { @"sync".w @"sync".Mutex; @"sync".writerSem uint32; @"sync".readerSem uint32; @"sync".readerCount int32; @"sync".readerWait int32 }
+	func (@"sync".rwÂ·1 *@"sync".RWMutex) Lock ()
+	func (@"sync".rwÂ·1 *@"sync".RWMutex) RLock ()
+	func (@"sync".rwÂ·2 *@"sync".RWMutex "esc:0x12") RLocker () (? @"sync".Locker) { return (*@"sync".rlocker)(@"sync".rwÂ·2) }
+	func (@"sync".rwÂ·1 *@"sync".RWMutex) RUnlock ()
+	func (@"sync".rwÂ·1 *@"sync".RWMutex) Unlock ()
+	type @"sync".syncSema struct { @"sync".lock uintptr; @"sync".head @"unsafe".Pointer; @"sync".tail @"unsafe".Pointer }
+	type @"sync".copyChecker uintptr
+	func (@"sync".cÂ·1 *@"sync".copyChecker) @"sync".check ()
+	type @"sync".Cond struct { L @"sync".Locker; @"sync".sema @"sync".syncSema; @"sync".waiters uint32; @"sync".checker @"sync".copyChecker }
+	func (@"sync".cÂ·1 *@"sync".Cond) Broadcast ()
+	func (@"sync".cÂ·1 *@"sync".Cond) Signal ()
+	func (@"sync".cÂ·1 *@"sync".Cond) Wait ()
+	func (@"sync".cÂ·1 *@"sync".Cond) @"sync".signalImpl (@"sync".allÂ·2 bool)
+	import net "net" // indirect
+	type @"net".IPMask []byte
+	func (@"net".mÂ·3 @"net".IPMask "esc:0x1") Size () (@"net".onesÂ·1 int, @"net".bitsÂ·2 int)
+	func (@"net".mÂ·2 @"net".IPMask "esc:0x1") String () (? string)
+	type @"net".IP []byte
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") DefaultMask () (? @"net".IPMask)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") Equal (@"net".xÂ·3 @"net".IP "esc:0x1") (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsGlobalUnicast () (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsInterfaceLocalMulticast () (? bool) { return len(@"net".ipÂ·2) == 0x10 && @"net".ipÂ·2[0x0] == byte(0xff) && @"net".ipÂ·2[0x1] & byte(0xf) == byte(0x1) }
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsLinkLocalMulticast () (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsLinkLocalUnicast () (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsLoopback () (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsMulticast () (? bool)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") IsUnspecified () (? bool)
+	func (@"net".ipÂ·3 @"net".IP "esc:0x1") MarshalText () (? []byte, ? error)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") Mask (@"net".maskÂ·3 @"net".IPMask "esc:0x1") (? @"net".IP)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x1") String () (? string)
+	func (@"net".ipÂ·2 @"net".IP "esc:0x12") To16 () (? @"net".IP) { if len(@"net".ipÂ·2) == 0x4 { return @"net".IPv4(@"net".ipÂ·2[0x0], @"net".ipÂ·2[0x1], @"net".ipÂ·2[0x2], @"net".ipÂ·2[0x3]) }; if len(@"net".ipÂ·2) == 0x10 { return @"net".ipÂ·2 }; return nil }
+	func (@"net".ipÂ·2 @"net".IP "esc:0x12") To4 () (? @"net".IP)
+	func (@"net".ipÂ·2 *@"net".IP "esc:0x1") UnmarshalText (@"net".textÂ·3 []byte "esc:0x1") (? error)
+	type @"net".Addr interface { Network() (? string); String() (? string) }
+	import syscall "syscall" // indirect
+	type @"syscall"._Socklen uint32
+	type @"syscall".Sockaddr interface { @"syscall".sockaddr() (@"syscall".ptr @"unsafe".Pointer, @"syscall".len @"syscall"._Socklen, @"syscall".err error) }
+	type @"net".TCPAddr struct { IP @"net".IP; Port int; Zone string }
+	func (@"net".aÂ·2 *@"net".TCPAddr "esc:0x1") Network () (? string) { return "tcp" }
+	func (@"net".aÂ·2 *@"net".TCPAddr "esc:0x1") String () (? string)
+	func (@"net".aÂ·2 *@"net".TCPAddr "esc:0x1") @"net".family () (? int)
+	func (@"net".aÂ·2 *@"net".TCPAddr "esc:0x1") @"net".isWildcard () (? bool)
+	func (@"net".aÂ·2 *@"net".TCPAddr "esc:0x12") @"net".opAddr () (? @"net".Addr) { if @"net".aÂ·2 == nil { return nil }; return @"net".aÂ·2 }
+	func (@"net".aÂ·3 *@"net".TCPAddr "esc:0x1") @"net".sockaddr (@"net".familyÂ·4 int) (? @"syscall".Sockaddr, ? error)
+	import time "time" // indirect
+	type @"time".zone struct { @"time".name string; @"time".offset int; @"time".isDST bool }
+	type @"time".zoneTrans struct { @"time".when int64; @"time".index uint8; @"time".isstd bool; @"time".isutc bool }
+	type @"time".Location struct { @"time".name string; @"time".zone []@"time".zone; @"time".tx []@"time".zoneTrans; @"time".cacheStart int64; @"time".cacheEnd int64; @"time".cacheZone *@"time".zone }
+	func (@"time".lÂ·2 *@"time".Location "esc:0x22") String () (? string)
+	func (@"time".lÂ·2 *@"time".Location "esc:0x1") @"time".firstZoneUsed () (? bool)
+	func (@"time".lÂ·2 *@"time".Location "esc:0x12") @"time".get () (? *@"time".Location)
+	func (@"time".lÂ·6 *@"time".Location "esc:0x32") @"time".lookup (@"time".secÂ·7 int64) (@"time".nameÂ·1 string, @"time".offsetÂ·2 int, @"time".isDSTÂ·3 bool, @"time".startÂ·4 int64, @"time".endÂ·5 int64)
+	func (@"time".lÂ·2 *@"time".Location "esc:0x1") @"time".lookupFirstZone () (? int)
+	func (@"time".lÂ·4 *@"time".Location "esc:0x1") @"time".lookupName (@"time".nameÂ·5 string "esc:0x1", @"time".unixÂ·6 int64) (@"time".offsetÂ·1 int, @"time".isDSTÂ·2 bool, @"time".okÂ·3 bool)
+	type @"time".Duration int64
+	func (@"time".dÂ·2 @"time".Duration) Hours () (? float64) { var @"time".hourÂ·3 @"time".Duration; ; @"time".hourÂ·3 = @"time".dÂ·2 / @"time".Duration(0x34630b8a000); var @"time".nsecÂ·4 @"time".Duration; ; @"time".nsecÂ·4 = @"time".dÂ·2 % @"time".Duration(0x34630b8a000); return float64(@"time".hourÂ·3) + float64(@"time".nsecÂ·4) * 8190022623310637111963488201822504381538623676021880892417778544696899264837610290203272971060556344039023584360473938041055625214280336402169897364226048p-553 }
+	func (@"time".dÂ·2 @"time".Duration) Minutes () (? float64) { var @"time".minÂ·3 @"time".Duration; ; @"time".minÂ·3 = @"time".dÂ·2 / @"time".Duration(0xdf8475800); var @"time".nsecÂ·4 @"time".Duration; ; @"time".nsecÂ·4 = @"time".dÂ·2 % @"time".Duration(0xdf8475800); return float64(@"time".minÂ·3) + float64(@"time".nsecÂ·4) * 7678146209353722106395056769533233877065564876941352542109479049699919628723768656821910653339403201031675627614471533358284117434246264392176261853609984p-547 }
+	func (@"time".dÂ·2 @"time".Duration) Nanoseconds () (? int64) { return int64(@"time".dÂ·2) }
+	func (@"time".dÂ·2 @"time".Duration) Seconds () (? float64) { var @"time".secÂ·3 @"time".Duration; ; @"time".secÂ·3 = @"time".dÂ·2 / @"time".Duration(0x3b9aca00); var @"time".nsecÂ·4 @"time".Duration; ; @"time".nsecÂ·4 = @"time".dÂ·2 % @"time".Duration(0x3b9aca00); return float64(@"time".secÂ·3) + float64(@"time".nsecÂ·4) * 7198262071269114660816079141112770740375861891461678802759824945047098083990024106014198994535558872472104883612039846078596891298747423852523262413111296p-541 }
+	func (@"time".dÂ·2 @"time".Duration) String () (? string)
+	type @"time".Month int
+	func (@"time".mÂ·2 @"time".Month) String () (? string) { return @"time".months[@"time".mÂ·2 - @"time".Month(0x1)] }
+	type @"time".Weekday int
+	func (@"time".dÂ·2 @"time".Weekday) String () (? string) { return @"time".days[@"time".dÂ·2] }
+	type @"time".Time struct { @"time".sec int64; @"time".nsec int32; @"time".loc *@"time".Location }
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") Add (@"time".dÂ·3 @"time".Duration) (? @"time".Time) { @"time".tÂ·2.@"time".sec += int64(@"time".dÂ·3 / @"time".Duration(0x3b9aca00)); var @"time".nsecÂ·4 int32; ; @"time".nsecÂ·4 = int32(@"time".tÂ·2.@"time".nsec) + int32(@"time".dÂ·3 % @"time".Duration(0x3b9aca00)); if @"time".nsecÂ·4 >= 0x3b9aca00 { @"time".tÂ·2.@"time".sec++; @"time".nsecÂ·4 -= 0x3b9aca00 } else { if @"time".nsecÂ·4 < 0x0 { @"time".tÂ·2.@"time".sec--; @"time".nsecÂ·4 += 0x3b9aca00 } }; @"time".tÂ·2.@"time".nsec = @"time".nsecÂ·4; return @"time".tÂ·2 }
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") AddDate (@"time".yearsÂ·3 int, @"time".monthsÂ·4 int, @"time".daysÂ·5 int) (? @"time".Time)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") After (@"time".uÂ·3 @"time".Time "esc:0x1") (? bool) { return @"time".tÂ·2.@"time".sec > @"time".uÂ·3.@"time".sec || @"time".tÂ·2.@"time".sec == @"time".uÂ·3.@"time".sec && @"time".tÂ·2.@"time".nsec > @"time".uÂ·3.@"time".nsec }
+	func (@"time".tÂ·2 @"time".Time "esc:0x9") AppendFormat (@"time".bÂ·3 []byte "esc:0x1a", @"time".layoutÂ·4 string "esc:0x9") (? []byte)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Before (@"time".uÂ·3 @"time".Time "esc:0x1") (? bool) { return @"time".tÂ·2.@"time".sec < @"time".uÂ·3.@"time".sec || @"time".tÂ·2.@"time".sec == @"time".uÂ·3.@"time".sec && @"time".tÂ·2.@"time".nsec < @"time".uÂ·3.@"time".nsec }
+	func (@"time".tÂ·4 @"time".Time "esc:0x1") Clock () (@"time".hourÂ·1 int, @"time".minÂ·2 int, @"time".secÂ·3 int)
+	func (@"time".tÂ·4 @"time".Time "esc:0x1") Date () (@"time".yearÂ·1 int, @"time".monthÂ·2 @"time".Month, @"time".dayÂ·3 int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Day () (? int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Equal (@"time".uÂ·3 @"time".Time "esc:0x1") (? bool) { return @"time".tÂ·2.@"time".sec == @"time".uÂ·3.@"time".sec && @"time".tÂ·2.@"time".nsec == @"time".uÂ·3.@"time".nsec }
+	func (@"time".tÂ·2 @"time".Time "esc:0x9") Format (@"time".layoutÂ·3 string "esc:0x9") (? string)
+	func (@"time".tÂ·2 *@"time".Time "esc:0x1") GobDecode (@"time".dataÂ·3 []byte "esc:0x1") (? error)
+	func (@"time".tÂ·3 @"time".Time "esc:0x1") GobEncode () (? []byte, ? error)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Hour () (? int)
+	func (@"time".tÂ·3 @"time".Time "esc:0x1") ISOWeek () (@"time".yearÂ·1 int, @"time".weekÂ·2 int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") In (@"time".locÂ·3 *@"time".Location "esc:0x12") (? @"time".Time)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") IsZero () (? bool) { return @"time".tÂ·2.@"time".sec == 0x0 && @"time".tÂ·2.@"time".nsec == 0x0 }
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") Local () (? @"time".Time) { @"time".tÂ·2.@"time".loc = @"time".Local; return @"time".tÂ·2 }
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") Location () (? *@"time".Location) { var @"time".lÂ·3 *@"time".Location; ; @"time".lÂ·3 = @"time".tÂ·2.@"time".loc; if @"time".lÂ·3 == nil { @"time".lÂ·3 = @"time".UTC }; return @"time".lÂ·3 }
+	func (@"time".tÂ·3 @"time".Time "esc:0x1") MarshalBinary () (? []byte, ? error)
+	func (@"time".tÂ·3 @"time".Time "esc:0x9") MarshalJSON () (? []byte, ? error)
+	func (@"time".tÂ·3 @"time".Time "esc:0x9") MarshalText () (? []byte, ? error)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Minute () (? int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Month () (? @"time".Month)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Nanosecond () (? int) { return int(@"time".tÂ·2.@"time".nsec) }
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") Round (@"time".dÂ·3 @"time".Duration) (? @"time".Time)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Second () (? int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x9") String () (? string)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Sub (@"time".uÂ·3 @"time".Time "esc:0x1") (? @"time".Duration)
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") Truncate (@"time".dÂ·3 @"time".Duration) (? @"time".Time)
+	func (@"time".tÂ·2 @"time".Time "esc:0x12") UTC () (? @"time".Time) { @"time".tÂ·2.@"time".loc = @"time".UTC; return @"time".tÂ·2 }
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Unix () (? int64) { return @"time".tÂ·2.@"time".sec + -0xe7791f700 }
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") UnixNano () (? int64) { return (@"time".tÂ·2.@"time".sec + -0xe7791f700) * 0x3b9aca00 + int64(@"time".tÂ·2.@"time".nsec) }
+	func (@"time".tÂ·2 *@"time".Time "esc:0x1") UnmarshalBinary (@"time".dataÂ·3 []byte "esc:0x1") (? error)
+	func (@"time".tÂ·2 *@"time".Time "esc:0x1") UnmarshalJSON (@"time".dataÂ·3 []byte "esc:0x1") (@"time".errÂ·1 error)
+	func (@"time".tÂ·2 *@"time".Time "esc:0x1") UnmarshalText (@"time".dataÂ·3 []byte "esc:0x1") (@"time".errÂ·1 error)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Weekday () (? @"time".Weekday)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") Year () (? int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") YearDay () (? int)
+	func (@"time".tÂ·3 @"time".Time "esc:0x32") Zone () (@"time".nameÂ·1 string, @"time".offsetÂ·2 int)
+	func (@"time".tÂ·2 @"time".Time "esc:0x1") @"time".abs () (? uint64)
+	func (@"time".tÂ·5 @"time".Time "esc:0x1") @"time".date (@"time".fullÂ·6 bool) (@"time".yearÂ·1 int, @"time".monthÂ·2 @"time".Month, @"time".dayÂ·3 int, @"time".ydayÂ·4 int)
+	func (@"time".tÂ·4 @"time".Time "esc:0x32") @"time".locabs () (@"time".nameÂ·1 string, @"time".offsetÂ·2 int, @"time".absÂ·3 uint64)
+	type @"net".Conn interface { Close() (? error); LocalAddr() (? @"net".Addr); Read(@"net".b []byte) (@"net".n int, @"net".err error); RemoteAddr() (? @"net".Addr); SetDeadline(@"net".t @"time".Time) (? error); SetReadDeadline(@"net".t @"time".Time) (? error); SetWriteDeadline(@"net".t @"time".Time) (? error); Write(@"net".b []byte) (@"net".n int, @"net".err error) }
+	type @"gopkg.in/mgo.v2".replyOp struct { @"gopkg.in/mgo.v2".flags uint32; @"gopkg.in/mgo.v2".cursorId int64; @"gopkg.in/mgo.v2".firstDoc int32; @"gopkg.in/mgo.v2".replyDocs int32 }
+	type @"gopkg.in/mgo.v2".replyFunc func(@"gopkg.in/mgo.v2".err error, @"gopkg.in/mgo.v2".reply *@"gopkg.in/mgo.v2".replyOp, @"gopkg.in/mgo.v2".docNum int, @"gopkg.in/mgo.v2".docData []byte)
+	type @"gopkg.in/mgo.v2".Credential struct { Username string; Password string; Source string; Service string; ServiceHost string; Mechanism string }
+	type @"gopkg.in/mgo.v2/bson".DocElem struct { Name string; Value interface {} }
+	type @"gopkg.in/mgo.v2/bson".M map[string]interface {}
+	type @"gopkg.in/mgo.v2/bson".D []@"gopkg.in/mgo.v2/bson".DocElem
+	func (@"gopkg.in/mgo.v2/bson".dÂ·2 @"gopkg.in/mgo.v2/bson".D "esc:0x9") Map () (@"gopkg.in/mgo.v2/bson".mÂ·1 @"gopkg.in/mgo.v2/bson".M)
+	type @"gopkg.in/mgo.v2".mongoServerInfo struct { Master bool; Mongos bool; Tags @"gopkg.in/mgo.v2/bson".D; MaxWireVersion int; SetName string }
+	type @"gopkg.in/mgo.v2".queryOpFlags uint32
+	type @"gopkg.in/mgo.v2".Mode int
+	type @"gopkg.in/mgo.v2".queryWrapper struct { Query interface {} "$query"; OrderBy interface {} "$orderby,omitempty"; Hint interface {} "$hint,omitempty"; Explain bool "$explain,omitempty"; Snapshot bool "$snapshot,omitempty"; ReadPreference @"gopkg.in/mgo.v2/bson".D "$readPreference,omitempty"; MaxScan int "$maxScan,omitempty"; MaxTimeMS int "$maxTimeMS,omitempty"; Comment string "$comment,omitempty" }
+	type @"gopkg.in/mgo.v2".queryOp struct { @"gopkg.in/mgo.v2".collection string; @"gopkg.in/mgo.v2".query interface {}; @"gopkg.in/mgo.v2".skip int32; @"gopkg.in/mgo.v2".limit int32; @"gopkg.in/mgo.v2".selector interface {}; @"gopkg.in/mgo.v2".flags @"gopkg.in/mgo.v2".queryOpFlags; @"gopkg.in/mgo.v2".replyFunc @"gopkg.in/mgo.v2".replyFunc; @"gopkg.in/mgo.v2".mode @"gopkg.in/mgo.v2".Mode; @"gopkg.in/mgo.v2".options @"gopkg.in/mgo.v2".queryWrapper; @"gopkg.in/mgo.v2".hasOptions bool; @"gopkg.in/mgo.v2".serverTags []@"gopkg.in/mgo.v2/bson".D }
+	func (@"gopkg.in/mgo.v2".opÂ·2 *@"gopkg.in/mgo.v2".queryOp) @"gopkg.in/mgo.v2".finalQuery (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket) (? interface {})
+	type @"gopkg.in/mgo.v2".deadlineType int
+	type @"gopkg.in/mgo.v2".mongoSocket struct { ? @"sync".Mutex; @"gopkg.in/mgo.v2".server *@"gopkg.in/mgo.v2".mongoServer; @"gopkg.in/mgo.v2".conn @"net".Conn; @"gopkg.in/mgo.v2".timeout @"time".Duration; @"gopkg.in/mgo.v2".addr string; @"gopkg.in/mgo.v2".nextRequestId uint32; @"gopkg.in/mgo.v2".replyFuncs map[uint32]@"gopkg.in/mgo.v2".replyFunc; @"gopkg.in/mgo.v2".references int; @"gopkg.in/mgo.v2".creds []@"gopkg.in/mgo.v2".Credential; @"gopkg.in/mgo.v2".logout []@"gopkg.in/mgo.v2".Credential; @"gopkg.in/mgo.v2".cachedNonce string; @"gopkg.in/mgo.v2".gotNonce @"sync".Cond; @"gopkg.in/mgo.v2".dead error; @"gopkg.in/mgo.v2".serverInfo *@"gopkg.in/mgo.v2".mongoServerInfo }
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) Acquire () (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".mongoServerInfo)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) Close ()
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) InitialAcquire (@"gopkg.in/mgo.v2".serverInfoÂ·3 *@"gopkg.in/mgo.v2".mongoServerInfo, @"gopkg.in/mgo.v2".timeoutÂ·4 @"time".Duration) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) Login (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) Logout (@"gopkg.in/mgo.v2".dbÂ·2 string)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) LogoutAll ()
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) Query (@"gopkg.in/mgo.v2".opsÂ·3 ...interface {} "esc:0x9") (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) Release ()
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) Server () (? *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) ServerInfo () (? *@"gopkg.in/mgo.v2".mongoServerInfo)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) SetTimeout (@"gopkg.in/mgo.v2".dÂ·2 @"time".Duration)
+	func (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket) SimpleQuery (@"gopkg.in/mgo.v2".opÂ·4 *@"gopkg.in/mgo.v2".queryOp) (@"gopkg.in/mgo.v2".dataÂ·1 []byte, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket "esc:0x3a") @"gopkg.in/mgo.v2".dropAuth (@"gopkg.in/mgo.v2".dbÂ·4 string "esc:0x1") (@"gopkg.in/mgo.v2".credÂ·1 @"gopkg.in/mgo.v2".Credential, @"gopkg.in/mgo.v2".foundÂ·2 bool)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket "esc:0x9") @"gopkg.in/mgo.v2".dropLogout (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential "esc:0x1") (@"gopkg.in/mgo.v2".foundÂ·1 bool)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".flushLogout () (@"gopkg.in/mgo.v2".opsÂ·1 []interface {})
+	func (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".getNonce () (@"gopkg.in/mgo.v2".nonceÂ·1 string, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".kill (@"gopkg.in/mgo.v2".errÂ·2 error, @"gopkg.in/mgo.v2".abendÂ·3 bool)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".loginClassic (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".loginPlain (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".loginRun (@"gopkg.in/mgo.v2".dbÂ·3 string "esc:0x1", @"gopkg.in/mgo.v2".queryÂ·4 interface {}, @"gopkg.in/mgo.v2".resultÂ·5 interface {}, @"gopkg.in/mgo.v2".fÂ·6 func() (? error)) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".loginSASL (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".loginX509 (@"gopkg.in/mgo.v2".credÂ·3 @"gopkg.in/mgo.v2".Credential) (? error)
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".readLoop ()
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".resetNonce ()
+	func (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket) @"gopkg.in/mgo.v2".updateDeadline (@"gopkg.in/mgo.v2".whichÂ·2 @"gopkg.in/mgo.v2".deadlineType)
+	type @"gopkg.in/mgo.v2".ServerAddr struct { @"gopkg.in/mgo.v2".str string; @"gopkg.in/mgo.v2".tcp *@"net".TCPAddr }
+	func (@"gopkg.in/mgo.v2".addrÂ·2 *@"gopkg.in/mgo.v2".ServerAddr "esc:0x22") String () (? string) { return @"gopkg.in/mgo.v2".addrÂ·2.@"gopkg.in/mgo.v2".str }
+	func (@"gopkg.in/mgo.v2".addrÂ·2 *@"gopkg.in/mgo.v2".ServerAddr "esc:0x22") TCPAddr () (? *@"net".TCPAddr) { return @"gopkg.in/mgo.v2".addrÂ·2.@"gopkg.in/mgo.v2".tcp }
+	type @"gopkg.in/mgo.v2".dialer struct { @"gopkg.in/mgo.v2".old func(@"gopkg.in/mgo.v2".addr @"net".Addr) (? @"net".Conn, ? error); @"gopkg.in/mgo.v2".new func(@"gopkg.in/mgo.v2".addr *@"gopkg.in/mgo.v2".ServerAddr) (? @"net".Conn, ? error) }
+	func (@"gopkg.in/mgo.v2".dialÂ·2 @"gopkg.in/mgo.v2".dialer "esc:0x1") @"gopkg.in/mgo.v2".isSet () (? bool) { return @"gopkg.in/mgo.v2".dialÂ·2.@"gopkg.in/mgo.v2".old != nil || @"gopkg.in/mgo.v2".dialÂ·2.@"gopkg.in/mgo.v2".new != nil }
+	type @"gopkg.in/mgo.v2".mongoServer struct { ? @"sync".RWMutex; Addr string; ResolvedAddr string; @"gopkg.in/mgo.v2".tcpaddr *@"net".TCPAddr; @"gopkg.in/mgo.v2".unusedSockets []*@"gopkg.in/mgo.v2".mongoSocket; @"gopkg.in/mgo.v2".liveSockets []*@"gopkg.in/mgo.v2".mongoSocket; @"gopkg.in/mgo.v2".closed bool; @"gopkg.in/mgo.v2".abended bool; @"gopkg.in/mgo.v2".sync chan bool; @"gopkg.in/mgo.v2".dial @"gopkg.in/mgo.v2".dialer; @"gopkg.in/mgo.v2".pingValue @"time".Duration; @"gopkg.in/mgo.v2".pingIndex int; @"gopkg.in/mgo.v2".pingCount uint32; @"gopkg.in/mgo.v2".pingWindow [6]@"time".Duration; @"gopkg.in/mgo.v2".info *@"gopkg.in/mgo.v2".mongoServerInfo }
+	func (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer) AbendSocket (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket "esc:0x1")
+	func (@"gopkg.in/mgo.v2".serverÂ·4 *@"gopkg.in/mgo.v2".mongoServer) AcquireSocket (@"gopkg.in/mgo.v2".poolLimitÂ·5 int, @"gopkg.in/mgo.v2".timeoutÂ·6 @"time".Duration) (@"gopkg.in/mgo.v2".socketÂ·1 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".abendedÂ·2 bool, @"gopkg.in/mgo.v2".errÂ·3 error)
+	func (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer) Close ()
+	func (@"gopkg.in/mgo.v2".serverÂ·3 *@"gopkg.in/mgo.v2".mongoServer) Connect (@"gopkg.in/mgo.v2".timeoutÂ·4 @"time".Duration) (? *@"gopkg.in/mgo.v2".mongoSocket, ? error)
+	func (@"gopkg.in/mgo.v2".serverÂ·2 *@"gopkg.in/mgo.v2".mongoServer) Info () (? *@"gopkg.in/mgo.v2".mongoServerInfo)
+	func (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer) RecycleSocket (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket)
+	func (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer) SetInfo (@"gopkg.in/mgo.v2".infoÂ·2 *@"gopkg.in/mgo.v2".mongoServerInfo)
+	func (@"gopkg.in/mgo.v2".serverÂ·2 *@"gopkg.in/mgo.v2".mongoServer "esc:0x1") @"gopkg.in/mgo.v2".hasTags (@"gopkg.in/mgo.v2".serverTagsÂ·3 []@"gopkg.in/mgo.v2/bson".D "esc:0x1") (? bool)
+	func (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer) @"gopkg.in/mgo.v2".pinger (@"gopkg.in/mgo.v2".loopÂ·2 bool)
+	type @"gopkg.in/mgo.v2".mongoServerSlice []*@"gopkg.in/mgo.v2".mongoServer
+	func (@"gopkg.in/mgo.v2".sÂ·2 @"gopkg.in/mgo.v2".mongoServerSlice "esc:0x1") Len () (? int) { return len(@"gopkg.in/mgo.v2".sÂ·2) }
+	func (@"gopkg.in/mgo.v2".sÂ·2 @"gopkg.in/mgo.v2".mongoServerSlice "esc:0x1") Less (@"gopkg.in/mgo.v2".iÂ·3 int, @"gopkg.in/mgo.v2".jÂ·4 int) (? bool) { return @"gopkg.in/mgo.v2".sÂ·2[@"gopkg.in/mgo.v2".iÂ·3].ResolvedAddr < @"gopkg.in/mgo.v2".sÂ·2[@"gopkg.in/mgo.v2".jÂ·4].ResolvedAddr }
+	func (@"gopkg.in/mgo.v2".sÂ·3 @"gopkg.in/mgo.v2".mongoServerSlice "esc:0x1") Search (@"gopkg.in/mgo.v2".resolvedAddrÂ·4 string "esc:0x1") (@"gopkg.in/mgo.v2".iÂ·1 int, @"gopkg.in/mgo.v2".okÂ·2 bool)
+	func (@"gopkg.in/mgo.v2".sÂ·1 @"gopkg.in/mgo.v2".mongoServerSlice) Sort ()
+	func (@"gopkg.in/mgo.v2".sÂ·1 @"gopkg.in/mgo.v2".mongoServerSlice "esc:0x9") Swap (@"gopkg.in/mgo.v2".iÂ·2 int, @"gopkg.in/mgo.v2".jÂ·3 int) { @"gopkg.in/mgo.v2".sÂ·1[@"gopkg.in/mgo.v2".iÂ·2], @"gopkg.in/mgo.v2".sÂ·1[@"gopkg.in/mgo.v2".jÂ·3] = @"gopkg.in/mgo.v2".sÂ·1[@"gopkg.in/mgo.v2".jÂ·3], @"gopkg.in/mgo.v2".sÂ·1[@"gopkg.in/mgo.v2".iÂ·2] }
+	type @"gopkg.in/mgo.v2".mongoServers struct { @"gopkg.in/mgo.v2".slice @"gopkg.in/mgo.v2".mongoServerSlice }
+	func (@"gopkg.in/mgo.v2".serversÂ·1 *@"gopkg.in/mgo.v2".mongoServers "esc:0x9") Add (@"gopkg.in/mgo.v2".serverÂ·2 *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x3a") BestFit (@"gopkg.in/mgo.v2".modeÂ·3 @"gopkg.in/mgo.v2".Mode, @"gopkg.in/mgo.v2".serverTagsÂ·4 []@"gopkg.in/mgo.v2/bson".D "esc:0x1") (? *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x1") Empty () (? bool) { return len(@"gopkg.in/mgo.v2".serversÂ·2.@"gopkg.in/mgo.v2".slice) == 0x0 }
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x32") Get (@"gopkg.in/mgo.v2".iÂ·3 int) (? *@"gopkg.in/mgo.v2".mongoServer) { return @"gopkg.in/mgo.v2".serversÂ·2.@"gopkg.in/mgo.v2".slice[@"gopkg.in/mgo.v2".iÂ·3] }
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x1") Len () (? int) { return len(@"gopkg.in/mgo.v2".serversÂ·2.@"gopkg.in/mgo.v2".slice) }
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x3a") Remove (@"gopkg.in/mgo.v2".otherÂ·3 *@"gopkg.in/mgo.v2".mongoServer "esc:0x1") (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x32") Search (@"gopkg.in/mgo.v2".resolvedAddrÂ·3 string "esc:0x1") (@"gopkg.in/mgo.v2".serverÂ·1 *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".serversÂ·2 *@"gopkg.in/mgo.v2".mongoServers "esc:0x22") Slice () (? []*@"gopkg.in/mgo.v2".mongoServer) { return ([]*@"gopkg.in/mgo.v2".mongoServer)(@"gopkg.in/mgo.v2".serversÂ·2.@"gopkg.in/mgo.v2".slice) }
+	type @"gopkg.in/mgo.v2".syncKind bool
+	type @"gopkg.in/mgo.v2".isMasterResult struct { IsMaster bool; Secondary bool; Primary string; Hosts []string; Passives []string; Tags @"gopkg.in/mgo.v2/bson".D; Msg string; SetName string "bson:\"setName\""; MaxWireVersion int "bson:\"maxWireVersion\"" }
+	type @"gopkg.in/mgo.v2".mongoCluster struct { ? @"sync".RWMutex; @"gopkg.in/mgo.v2".serverSynced @"sync".Cond; @"gopkg.in/mgo.v2".userSeeds []string; @"gopkg.in/mgo.v2".dynaSeeds []string; @"gopkg.in/mgo.v2".servers @"gopkg.in/mgo.v2".mongoServers; @"gopkg.in/mgo.v2".masters @"gopkg.in/mgo.v2".mongoServers; @"gopkg.in/mgo.v2".references int; @"gopkg.in/mgo.v2".syncing bool; @"gopkg.in/mgo.v2".direct bool; @"gopkg.in/mgo.v2".failFast bool; @"gopkg.in/mgo.v2".syncCount uint; @"gopkg.in/mgo.v2".setName string; @"gopkg.in/mgo.v2".cachedIndex map[string]bool; @"gopkg.in/mgo.v2".sync chan bool; @"gopkg.in/mgo.v2".dial @"gopkg.in/mgo.v2".dialer }
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) Acquire ()
+	func (@"gopkg.in/mgo.v2".clusterÂ·3 *@"gopkg.in/mgo.v2".mongoCluster) AcquireSocket (@"gopkg.in/mgo.v2".modeÂ·4 @"gopkg.in/mgo.v2".Mode, @"gopkg.in/mgo.v2".slaveOkÂ·5 bool, @"gopkg.in/mgo.v2".syncTimeoutÂ·6 @"time".Duration, @"gopkg.in/mgo.v2".socketTimeoutÂ·7 @"time".Duration, @"gopkg.in/mgo.v2".serverTagsÂ·8 []@"gopkg.in/mgo.v2/bson".D "esc:0x1", @"gopkg.in/mgo.v2".poolLimitÂ·9 int) (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) CacheIndex (@"gopkg.in/mgo.v2".cacheKeyÂ·2 string, @"gopkg.in/mgo.v2".existsÂ·3 bool)
+	func (@"gopkg.in/mgo.v2".clusterÂ·2 *@"gopkg.in/mgo.v2".mongoCluster) HasCachedIndex (@"gopkg.in/mgo.v2".cacheKeyÂ·3 string "esc:0x1") (@"gopkg.in/mgo.v2".resultÂ·1 bool)
+	func (@"gopkg.in/mgo.v2".clusterÂ·2 *@"gopkg.in/mgo.v2".mongoCluster) LiveServers () (@"gopkg.in/mgo.v2".serversÂ·1 []string)
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) Release ()
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) ResetIndexCache ()
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".addServer (@"gopkg.in/mgo.v2".serverÂ·2 *@"gopkg.in/mgo.v2".mongoServer, @"gopkg.in/mgo.v2".infoÂ·3 *@"gopkg.in/mgo.v2".mongoServerInfo, @"gopkg.in/mgo.v2".syncKindÂ·4 @"gopkg.in/mgo.v2".syncKind)
+	func (@"gopkg.in/mgo.v2".clusterÂ·2 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".getKnownAddrs () (? []string)
+	func (@"gopkg.in/mgo.v2".clusterÂ·2 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".isMaster (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".resultÂ·4 *@"gopkg.in/mgo.v2".isMasterResult) (? error)
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".removeServer (@"gopkg.in/mgo.v2".serverÂ·2 *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".clusterÂ·2 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".server (@"gopkg.in/mgo.v2".addrÂ·3 string, @"gopkg.in/mgo.v2".tcpaddrÂ·4 *@"net".TCPAddr) (? *@"gopkg.in/mgo.v2".mongoServer)
+	func (@"gopkg.in/mgo.v2".clusterÂ·4 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".syncServer (@"gopkg.in/mgo.v2".serverÂ·5 *@"gopkg.in/mgo.v2".mongoServer) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".mongoServerInfo, @"gopkg.in/mgo.v2".hostsÂ·2 []string, @"gopkg.in/mgo.v2".errÂ·3 error)
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster "esc:0x1") @"gopkg.in/mgo.v2".syncServers ()
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".syncServersIteration (@"gopkg.in/mgo.v2".directÂ·2 bool)
+	func (@"gopkg.in/mgo.v2".clusterÂ·1 *@"gopkg.in/mgo.v2".mongoCluster) @"gopkg.in/mgo.v2".syncServersLoop ()
+	type @"gopkg.in/mgo.v2".query struct { @"gopkg.in/mgo.v2".op @"gopkg.in/mgo.v2".queryOp; @"gopkg.in/mgo.v2".prefetch float64; @"gopkg.in/mgo.v2".limit int32 }
+	type @"gopkg.in/mgo.v2".BuildInfo struct { Version string; VersionArray []int "bson:\"versionArray\""; GitVersion string "bson:\"gitVersion\""; OpenSSLVersion string "bson:\"OpenSSLVersion\""; SysInfo string "bson:\"sysInfo\""; Bits int; Debug bool; MaxObjectSize int "bson:\"maxBsonObjectSize\"" }
+	func (@"gopkg.in/mgo.v2".biÂ·2 *@"gopkg.in/mgo.v2".BuildInfo "esc:0x1") VersionAtLeast (@"gopkg.in/mgo.v2".versionÂ·3 ...int "esc:0x1") (? bool)
+	type @"gopkg.in/mgo.v2".bulkOp int
+	type @"gopkg.in/mgo.v2".bulkAction struct { @"gopkg.in/mgo.v2".op @"gopkg.in/mgo.v2".bulkOp; @"gopkg.in/mgo.v2".docs []interface {}; @"gopkg.in/mgo.v2".idxs []int }
+	type @"gopkg.in/mgo.v2".BulkResult struct { Matched int; Modified int; @"gopkg.in/mgo.v2".private bool }
+	type @"gopkg.in/mgo.v2".BulkErrorCase struct { Index int; Err error }
+	type @"gopkg.in/mgo.v2".BulkError struct { @"gopkg.in/mgo.v2".ecases []@"gopkg.in/mgo.v2".BulkErrorCase }
+	func (@"gopkg.in/mgo.v2".eÂ·2 *@"gopkg.in/mgo.v2".BulkError "esc:0x22") Cases () (? []@"gopkg.in/mgo.v2".BulkErrorCase) { return @"gopkg.in/mgo.v2".eÂ·2.@"gopkg.in/mgo.v2".ecases }
+	func (@"gopkg.in/mgo.v2".eÂ·2 *@"gopkg.in/mgo.v2".BulkError "esc:0x9") Error () (? string)
+	type @"gopkg.in/mgo.v2".LastError struct { Err string; Code int; N int; Waited int; FSyncFiles int "bson:\"fsyncFiles\""; WTimeout bool; UpdatedExisting bool "bson:\"updatedExisting\""; UpsertedId interface {} "bson:\"upserted\""; @"gopkg.in/mgo.v2".modified int; @"gopkg.in/mgo.v2".ecases []@"gopkg.in/mgo.v2".BulkErrorCase }
+	func (@"gopkg.in/mgo.v2".errÂ·2 *@"gopkg.in/mgo.v2".LastError "esc:0x22") Error () (? string) { return @"gopkg.in/mgo.v2".errÂ·2.Err }
+	type @"gopkg.in/mgo.v2".Bulk struct { @"gopkg.in/mgo.v2".c *@"gopkg.in/mgo.v2".Collection; @"gopkg.in/mgo.v2".opcount int; @"gopkg.in/mgo.v2".actions []@"gopkg.in/mgo.v2".bulkAction; @"gopkg.in/mgo.v2".ordered bool }
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") Insert (@"gopkg.in/mgo.v2".docsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") Remove (@"gopkg.in/mgo.v2".selectorsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") RemoveAll (@"gopkg.in/mgo.v2".selectorsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·3 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") Run () (? *@"gopkg.in/mgo.v2".BulkResult, ? error)
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x1") Unordered () { @"gopkg.in/mgo.v2".bÂ·1.@"gopkg.in/mgo.v2".ordered = false }
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") Update (@"gopkg.in/mgo.v2".pairsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") UpdateAll (@"gopkg.in/mgo.v2".pairsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·1 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") Upsert (@"gopkg.in/mgo.v2".pairsÂ·2 ...interface {} "esc:0x9")
+	func (@"gopkg.in/mgo.v2".bÂ·2 *@"gopkg.in/mgo.v2".Bulk "esc:0x2a") @"gopkg.in/mgo.v2".action (@"gopkg.in/mgo.v2".opÂ·3 @"gopkg.in/mgo.v2".bulkOp, @"gopkg.in/mgo.v2".opcountÂ·4 int) (? *@"gopkg.in/mgo.v2".bulkAction)
+	func (@"gopkg.in/mgo.v2".bÂ·2 *@"gopkg.in/mgo.v2".Bulk "esc:0x1") @"gopkg.in/mgo.v2".checkSuccess (@"gopkg.in/mgo.v2".actionÂ·3 *@"gopkg.in/mgo.v2".bulkAction "esc:0x1", @"gopkg.in/mgo.v2".berrÂ·4 *@"gopkg.in/mgo.v2".BulkError "esc:0x9", @"gopkg.in/mgo.v2".lerrÂ·5 *@"gopkg.in/mgo.v2".LastError "esc:0x9", @"gopkg.in/mgo.v2".errÂ·6 error) (? bool)
+	func (@"gopkg.in/mgo.v2".bÂ·2 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") @"gopkg.in/mgo.v2".runInsert (@"gopkg.in/mgo.v2".actionÂ·3 *@"gopkg.in/mgo.v2".bulkAction "esc:0x9", @"gopkg.in/mgo.v2".resultÂ·4 *@"gopkg.in/mgo.v2".BulkResult "esc:0x1", @"gopkg.in/mgo.v2".berrÂ·5 *@"gopkg.in/mgo.v2".BulkError "esc:0x9") (? bool)
+	func (@"gopkg.in/mgo.v2".bÂ·2 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") @"gopkg.in/mgo.v2".runRemove (@"gopkg.in/mgo.v2".actionÂ·3 *@"gopkg.in/mgo.v2".bulkAction "esc:0x9", @"gopkg.in/mgo.v2".resultÂ·4 *@"gopkg.in/mgo.v2".BulkResult "esc:0x1", @"gopkg.in/mgo.v2".berrÂ·5 *@"gopkg.in/mgo.v2".BulkError "esc:0x9") (? bool)
+	func (@"gopkg.in/mgo.v2".bÂ·2 *@"gopkg.in/mgo.v2".Bulk "esc:0x9") @"gopkg.in/mgo.v2".runUpdate (@"gopkg.in/mgo.v2".actionÂ·3 *@"gopkg.in/mgo.v2".bulkAction "esc:0x9", @"gopkg.in/mgo.v2".resultÂ·4 *@"gopkg.in/mgo.v2".BulkResult "esc:0x1", @"gopkg.in/mgo.v2".berrÂ·5 *@"gopkg.in/mgo.v2".BulkError "esc:0x9") (? bool)
+	type @"gopkg.in/mgo.v2".CollectionInfo struct { DisableIdIndex bool; ForceIdIndex bool; Capped bool; MaxBytes int; MaxDocs int; Validator interface {}; ValidationLevel string; ValidationAction string; StorageEngine interface {} }
+	type @"gopkg.in/mgo.v2".Index struct { Key []string; Unique bool; DropDups bool; Background bool; Sparse bool; ExpireAfter @"time".Duration; Name string; Min int; Max int; Minf float64; Maxf float64; BucketSize float64; Bits int; DefaultLanguage string; LanguageOverride string; Weights map[string]int }
+	type @"gopkg.in/mgo.v2".ChangeInfo struct { Updated int; Removed int; Matched int; UpsertedId interface {} }
+	type @"gopkg.in/mgo.v2".Change struct { Update interface {}; Upsert bool; Remove bool; ReturnNew bool }
+	type @"gopkg.in/mgo.v2".queue struct { @"gopkg.in/mgo.v2".elems []interface {}; @"gopkg.in/mgo.v2".nelems int; @"gopkg.in/mgo.v2".popi int; @"gopkg.in/mgo.v2".pushi int }
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".queue "esc:0x1") Len () (? int) { return @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".nelems }
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".queue "esc:0x32") Pop () (@"gopkg.in/mgo.v2".elemÂ·1 interface {}) { if @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".nelems == 0x0 { return nil }; @"gopkg.in/mgo.v2".elemÂ·1 = @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".elems[@"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".popi]; @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".elems[@"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".popi] = nil; @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".nelems--; @"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".popi = (@"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".popi + 0x1) % len(@"gopkg.in/mgo.v2".qÂ·2.@"gopkg.in/mgo.v2".elems); return @"gopkg.in/mgo.v2".elemÂ·1 }
+	func (@"gopkg.in/mgo.v2".qÂ·1 *@"gopkg.in/mgo.v2".queue "esc:0x9") Push (@"gopkg.in/mgo.v2".elemÂ·2 interface {})
+	func (@"gopkg.in/mgo.v2".qÂ·1 *@"gopkg.in/mgo.v2".queue "esc:0x9") @"gopkg.in/mgo.v2".expand ()
+	type @"gopkg.in/mgo.v2".getMoreOp struct { @"gopkg.in/mgo.v2".collection string; @"gopkg.in/mgo.v2".limit int32; @"gopkg.in/mgo.v2".cursorId int64; @"gopkg.in/mgo.v2".replyFunc @"gopkg.in/mgo.v2".replyFunc }
+	type @"gopkg.in/mgo.v2".Iter struct { @"gopkg.in/mgo.v2".m @"sync".Mutex; @"gopkg.in/mgo.v2".gotReply @"sync".Cond; @"gopkg.in/mgo.v2".session *@"gopkg.in/mgo.v2".Session; @"gopkg.in/mgo.v2".server *@"gopkg.in/mgo.v2".mongoServer; @"gopkg.in/mgo.v2".docData @"gopkg.in/mgo.v2".queue; @"gopkg.in/mgo.v2".err error; @"gopkg.in/mgo.v2".op @"gopkg.in/mgo.v2".getMoreOp; @"gopkg.in/mgo.v2".prefetch float64; @"gopkg.in/mgo.v2".limit int32; @"gopkg.in/mgo.v2".docsToReceive int; @"gopkg.in/mgo.v2".docsBeforeMore int; @"gopkg.in/mgo.v2".timeout @"time".Duration; @"gopkg.in/mgo.v2".timedout bool; @"gopkg.in/mgo.v2".findCmd bool }
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) All (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) Close () (? error)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) Err () (? error)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) For (@"gopkg.in/mgo.v2".resultÂ·3 interface {}, @"gopkg.in/mgo.v2".fÂ·4 func() (? error) "esc:0x1") (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) Next (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? bool)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) Timeout () (? bool)
+	func (@"gopkg.in/mgo.v2".iterÂ·3 *@"gopkg.in/mgo.v2".Iter "esc:0x9") @"gopkg.in/mgo.v2".acquireSocket () (? *@"gopkg.in/mgo.v2".mongoSocket, ? error)
+	func (@"gopkg.in/mgo.v2".iterÂ·1 *@"gopkg.in/mgo.v2".Iter) @"gopkg.in/mgo.v2".getMore ()
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) @"gopkg.in/mgo.v2".getMoreCmd () (? *@"gopkg.in/mgo.v2".queryOp)
+	func (@"gopkg.in/mgo.v2".iterÂ·2 *@"gopkg.in/mgo.v2".Iter) @"gopkg.in/mgo.v2".replyFunc () (? @"gopkg.in/mgo.v2".replyFunc)
+	type @"gopkg.in/mgo.v2".MapReduceTime struct { Total int64; Map int64 "mapTime"; EmitLoop int64 "emitLoop" }
+	type @"gopkg.in/mgo.v2".MapReduceInfo struct { InputCount int; EmitCount int; OutputCount int; Database string; Collection string; Time int64; VerboseTime *@"gopkg.in/mgo.v2".MapReduceTime }
+	type @"gopkg.in/mgo.v2".MapReduce struct { Map string; Reduce string; Finalize string; Out interface {}; Scope interface {}; Verbose bool }
+	type @"gopkg.in/mgo.v2".Query struct { @"gopkg.in/mgo.v2".m @"sync".Mutex; @"gopkg.in/mgo.v2".session *@"gopkg.in/mgo.v2".Session; @"gopkg.in/mgo.v2".? @"gopkg.in/mgo.v2".query }
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) All (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".qÂ·3 *@"gopkg.in/mgo.v2".Query) Apply (@"gopkg.in/mgo.v2".changeÂ·4 @"gopkg.in/mgo.v2".Change, @"gopkg.in/mgo.v2".resultÂ·5 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".ChangeInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Batch (@"gopkg.in/mgo.v2".nÂ·3 int) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Comment (@"gopkg.in/mgo.v2".commentÂ·3 string) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·3 *@"gopkg.in/mgo.v2".Query) Count () (@"gopkg.in/mgo.v2".nÂ·1 int, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Distinct (@"gopkg.in/mgo.v2".keyÂ·3 string, @"gopkg.in/mgo.v2".resultÂ·4 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Explain (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) For (@"gopkg.in/mgo.v2".resultÂ·3 interface {}, @"gopkg.in/mgo.v2".fÂ·4 func() (? error) "esc:0x1") (? error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Hint (@"gopkg.in/mgo.v2".indexKeyÂ·3 ...string "esc:0x9") (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Iter () (? *@"gopkg.in/mgo.v2".Iter)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Limit (@"gopkg.in/mgo.v2".nÂ·3 int) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) LogReplay () (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·3 *@"gopkg.in/mgo.v2".Query) MapReduce (@"gopkg.in/mgo.v2".jobÂ·4 *@"gopkg.in/mgo.v2".MapReduce "esc:0x9", @"gopkg.in/mgo.v2".resultÂ·5 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".MapReduceInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) One (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Prefetch (@"gopkg.in/mgo.v2".pÂ·3 float64) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Select (@"gopkg.in/mgo.v2".selectorÂ·3 interface {}) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) SetMaxScan (@"gopkg.in/mgo.v2".nÂ·3 int) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) SetMaxTime (@"gopkg.in/mgo.v2".dÂ·3 @"time".Duration) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Skip (@"gopkg.in/mgo.v2".nÂ·3 int) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Snapshot () (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Sort (@"gopkg.in/mgo.v2".fieldsÂ·3 ...string "esc:0x9") (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".qÂ·2 *@"gopkg.in/mgo.v2".Query) Tail (@"gopkg.in/mgo.v2".timeoutÂ·3 @"time".Duration) (? *@"gopkg.in/mgo.v2".Iter)
+	type @"gopkg.in/mgo.v2/bson".Raw struct { Kind byte; Data []byte }
+	func (@"gopkg.in/mgo.v2/bson".rawÂ·2 @"gopkg.in/mgo.v2/bson".Raw) Unmarshal (@"gopkg.in/mgo.v2/bson".outÂ·3 interface {}) (@"gopkg.in/mgo.v2/bson".errÂ·1 error)
+	type @"gopkg.in/mgo.v2".Pipe struct { @"gopkg.in/mgo.v2".session *@"gopkg.in/mgo.v2".Session; @"gopkg.in/mgo.v2".collection *@"gopkg.in/mgo.v2".Collection; @"gopkg.in/mgo.v2".pipeline interface {}; @"gopkg.in/mgo.v2".allowDisk bool; @"gopkg.in/mgo.v2".batchSize int }
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x9") All (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x12") AllowDiskUse () (? *@"gopkg.in/mgo.v2".Pipe) { @"gopkg.in/mgo.v2".pÂ·2.@"gopkg.in/mgo.v2".allowDisk = true; return @"gopkg.in/mgo.v2".pÂ·2 }
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x12") Batch (@"gopkg.in/mgo.v2".nÂ·3 int) (? *@"gopkg.in/mgo.v2".Pipe) { @"gopkg.in/mgo.v2".pÂ·2.@"gopkg.in/mgo.v2".batchSize = @"gopkg.in/mgo.v2".nÂ·3; return @"gopkg.in/mgo.v2".pÂ·2 }
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x9") Explain (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x3a") Iter () (? *@"gopkg.in/mgo.v2".Iter)
+	func (@"gopkg.in/mgo.v2".pÂ·2 *@"gopkg.in/mgo.v2".Pipe "esc:0x9") One (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (? error)
+	type @"gopkg.in/mgo.v2".Collection struct { Database *@"gopkg.in/mgo.v2".Database; Name string; FullName string }
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) Bulk () (? *@"gopkg.in/mgo.v2".Bulk) { return (&@"gopkg.in/mgo.v2".Bulk{ @"gopkg.in/mgo.v2".c:@"gopkg.in/mgo.v2".cÂ·2, @"gopkg.in/mgo.v2".ordered:true }) }
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Count () (@"gopkg.in/mgo.v2".nÂ·1 int, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Create (@"gopkg.in/mgo.v2".infoÂ·3 *@"gopkg.in/mgo.v2".CollectionInfo "esc:0x9") (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") DropCollection () (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") DropIndex (@"gopkg.in/mgo.v2".keyÂ·3 ...string "esc:0x9") (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) DropIndexName (@"gopkg.in/mgo.v2".nameÂ·3 string) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) EnsureIndex (@"gopkg.in/mgo.v2".indexÂ·3 @"gopkg.in/mgo.v2".Index) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) EnsureIndexKey (@"gopkg.in/mgo.v2".keyÂ·3 ...string) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x2a") Find (@"gopkg.in/mgo.v2".queryÂ·3 interface {}) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x2a") FindId (@"gopkg.in/mgo.v2".idÂ·3 interface {}) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Indexes () (@"gopkg.in/mgo.v2".indexesÂ·1 []@"gopkg.in/mgo.v2".Index, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Insert (@"gopkg.in/mgo.v2".docsÂ·3 ...interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x2a") NewIter (@"gopkg.in/mgo.v2".sessionÂ·3 *@"gopkg.in/mgo.v2".Session, @"gopkg.in/mgo.v2".firstBatchÂ·4 []@"gopkg.in/mgo.v2/bson".Raw "esc:0x9", @"gopkg.in/mgo.v2".cursorIdÂ·5 int64, @"gopkg.in/mgo.v2".errÂ·6 error) (? *@"gopkg.in/mgo.v2".Iter)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) Pipe (@"gopkg.in/mgo.v2".pipelineÂ·3 interface {}) (? *@"gopkg.in/mgo.v2".Pipe)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Remove (@"gopkg.in/mgo.v2".selectorÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") RemoveAll (@"gopkg.in/mgo.v2".selectorÂ·4 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".ChangeInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") RemoveId (@"gopkg.in/mgo.v2".idÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x2a") Repair () (? *@"gopkg.in/mgo.v2".Iter)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Update (@"gopkg.in/mgo.v2".selectorÂ·3 interface {}, @"gopkg.in/mgo.v2".updateÂ·4 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") UpdateAll (@"gopkg.in/mgo.v2".selectorÂ·4 interface {}, @"gopkg.in/mgo.v2".updateÂ·5 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".ChangeInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection "esc:0x9") UpdateId (@"gopkg.in/mgo.v2".idÂ·3 interface {}, @"gopkg.in/mgo.v2".updateÂ·4 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") Upsert (@"gopkg.in/mgo.v2".selectorÂ·4 interface {}, @"gopkg.in/mgo.v2".updateÂ·5 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".ChangeInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") UpsertId (@"gopkg.in/mgo.v2".idÂ·4 interface {}, @"gopkg.in/mgo.v2".updateÂ·5 interface {}) (@"gopkg.in/mgo.v2".infoÂ·1 *@"gopkg.in/mgo.v2".ChangeInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·2 *@"gopkg.in/mgo.v2".Collection) With (@"gopkg.in/mgo.v2".sÂ·3 *@"gopkg.in/mgo.v2".Session) (? *@"gopkg.in/mgo.v2".Collection) { var @"gopkg.in/mgo.v2".newdbÂ·4 @"gopkg.in/mgo.v2".Database; ; @"gopkg.in/mgo.v2".newdbÂ·4 = *@"gopkg.in/mgo.v2".cÂ·2.Database; @"gopkg.in/mgo.v2".newdbÂ·4.Session = @"gopkg.in/mgo.v2".sÂ·3; var @"gopkg.in/mgo.v2".newcÂ·5 @"gopkg.in/mgo.v2".Collection; ; @"gopkg.in/mgo.v2".newcÂ·5 = *@"gopkg.in/mgo.v2".cÂ·2; @"gopkg.in/mgo.v2".newcÂ·5.Database = &@"gopkg.in/mgo.v2".newdbÂ·4; return &@"gopkg.in/mgo.v2".newcÂ·5 }
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") @"gopkg.in/mgo.v2".writeOp (@"gopkg.in/mgo.v2".opÂ·4 interface {}, @"gopkg.in/mgo.v2".orderedÂ·5 bool) (@"gopkg.in/mgo.v2".lerrÂ·1 *@"gopkg.in/mgo.v2".LastError, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x9") @"gopkg.in/mgo.v2".writeOpCommand (@"gopkg.in/mgo.v2".socketÂ·4 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".safeOpÂ·5 *@"gopkg.in/mgo.v2".queryOp "esc:0x9", @"gopkg.in/mgo.v2".opÂ·6 interface {}, @"gopkg.in/mgo.v2".orderedÂ·7 bool, @"gopkg.in/mgo.v2".bypassValidationÂ·8 bool) (@"gopkg.in/mgo.v2".lerrÂ·1 *@"gopkg.in/mgo.v2".LastError, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".cÂ·3 *@"gopkg.in/mgo.v2".Collection "esc:0x1") @"gopkg.in/mgo.v2".writeOpQuery (@"gopkg.in/mgo.v2".socketÂ·4 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".safeOpÂ·5 *@"gopkg.in/mgo.v2".queryOp "esc:0x9", @"gopkg.in/mgo.v2".opÂ·6 interface {}, @"gopkg.in/mgo.v2".orderedÂ·7 bool) (@"gopkg.in/mgo.v2".lerrÂ·1 *@"gopkg.in/mgo.v2".LastError, @"gopkg.in/mgo.v2".errÂ·2 error)
+	type @"gopkg.in/mgo.v2".DBRef struct { Collection string "bson:\"$ref\""; Id interface {} "bson:\"$id\""; Database string "bson:\"$db,omitempty\"" }
+	type @"gopkg.in/mgo.v2".gfsFileMode int
+	import hash "hash" // indirect
+	type @"hash".Hash interface { BlockSize() (? int); Reset(); Size() (? int); Sum(@"hash".b []byte) (? []byte); Write(@"io".p []byte) (@"io".n int, @"io".err error) }
+	type @"gopkg.in/mgo.v2".gfsCachedChunk struct { @"gopkg.in/mgo.v2".wait @"sync".Mutex; @"gopkg.in/mgo.v2".n int; @"gopkg.in/mgo.v2".data []byte; @"gopkg.in/mgo.v2".err error }
+	type @"gopkg.in/mgo.v2".gfsFile struct { Id interface {} "_id"; ChunkSize int "chunkSize"; UploadDate @"time".Time "uploadDate"; Length int64 ",minsize"; MD5 string; Filename string ",omitempty"; ContentType string "contentType,omitempty"; Metadata *@"gopkg.in/mgo.v2/bson".Raw ",omitempty" }
+	type @"gopkg.in/mgo.v2".GridFile struct { @"gopkg.in/mgo.v2".m @"sync".Mutex; @"gopkg.in/mgo.v2".c @"sync".Cond; @"gopkg.in/mgo.v2".gfs *@"gopkg.in/mgo.v2".GridFS; @"gopkg.in/mgo.v2".mode @"gopkg.in/mgo.v2".gfsFileMode; @"gopkg.in/mgo.v2".err error; @"gopkg.in/mgo.v2".chunk int; @"gopkg.in/mgo.v2".offset int64; @"gopkg.in/mgo.v2".wpending int; @"gopkg.in/mgo.v2".wbuf []byte; @"gopkg.in/mgo.v2".wsum @"hash".Hash; @"gopkg.in/mgo.v2".rbuf []byte; @"gopkg.in/mgo.v2".rcache *@"gopkg.in/mgo.v2".gfsCachedChunk; @"gopkg.in/mgo.v2".doc @"gopkg.in/mgo.v2".gfsFile }
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile "esc:0x1") Abort ()
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile) Close () (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile "esc:0x22") ContentType () (? string) { return @"gopkg.in/mgo.v2".fileÂ·2.@"gopkg.in/mgo.v2".doc.ContentType }
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile) GetMeta (@"gopkg.in/mgo.v2".resultÂ·3 interface {}) (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile "esc:0x22") Id () (? interface {}) { return @"gopkg.in/mgo.v2".fileÂ·2.@"gopkg.in/mgo.v2".doc.Id }
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile "esc:0x22") MD5 () (@"gopkg.in/mgo.v2".md5Â·1 string) { return @"gopkg.in/mgo.v2".fileÂ·2.@"gopkg.in/mgo.v2".doc.MD5 }
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile "esc:0x22") Name () (? string) { return @"gopkg.in/mgo.v2".fileÂ·2.@"gopkg.in/mgo.v2".doc.Filename }
+	func (@"gopkg.in/mgo.v2".fileÂ·3 *@"gopkg.in/mgo.v2".GridFile) Read (@"gopkg.in/mgo.v2".bÂ·4 []byte "esc:0x1") (@"gopkg.in/mgo.v2".nÂ·1 int, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·3 *@"gopkg.in/mgo.v2".GridFile) Seek (@"gopkg.in/mgo.v2".offsetÂ·4 int64, @"gopkg.in/mgo.v2".whenceÂ·5 int) (@"gopkg.in/mgo.v2".posÂ·1 int64, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetChunkSize (@"gopkg.in/mgo.v2".bytesÂ·2 int)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetContentType (@"gopkg.in/mgo.v2".ctypeÂ·2 string)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetId (@"gopkg.in/mgo.v2".idÂ·2 interface {})
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetMeta (@"gopkg.in/mgo.v2".metadataÂ·2 interface {})
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetName (@"gopkg.in/mgo.v2".nameÂ·2 string)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) SetUploadDate (@"gopkg.in/mgo.v2".tÂ·2 @"time".Time)
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile) Size () (@"gopkg.in/mgo.v2".bytesÂ·1 int64)
+	func (@"gopkg.in/mgo.v2".fileÂ·2 *@"gopkg.in/mgo.v2".GridFile "esc:0x22") UploadDate () (? @"time".Time) { return @"gopkg.in/mgo.v2".fileÂ·2.@"gopkg.in/mgo.v2".doc.UploadDate }
+	func (@"gopkg.in/mgo.v2".fileÂ·3 *@"gopkg.in/mgo.v2".GridFile) Write (@"gopkg.in/mgo.v2".dataÂ·4 []byte) (@"gopkg.in/mgo.v2".nÂ·1 int, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile "esc:0x1") @"gopkg.in/mgo.v2".assertMode (@"gopkg.in/mgo.v2".modeÂ·2 @"gopkg.in/mgo.v2".gfsFileMode)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) @"gopkg.in/mgo.v2".completeWrite ()
+	func (@"gopkg.in/mgo.v2".fileÂ·3 *@"gopkg.in/mgo.v2".GridFile) @"gopkg.in/mgo.v2".getChunk () (@"gopkg.in/mgo.v2".dataÂ·1 []byte, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile) @"gopkg.in/mgo.v2".insertChunk (@"gopkg.in/mgo.v2".dataÂ·2 []byte)
+	type @"gopkg.in/mgo.v2".GridFS struct { Files *@"gopkg.in/mgo.v2".Collection; Chunks *@"gopkg.in/mgo.v2".Collection }
+	func (@"gopkg.in/mgo.v2".gfsÂ·3 *@"gopkg.in/mgo.v2".GridFS) Create (@"gopkg.in/mgo.v2".nameÂ·4 string) (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".gfsÂ·2 *@"gopkg.in/mgo.v2".GridFS "esc:0x3a") Find (@"gopkg.in/mgo.v2".queryÂ·3 interface {}) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".gfsÂ·3 *@"gopkg.in/mgo.v2".GridFS) Open (@"gopkg.in/mgo.v2".nameÂ·4 string) (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".gfsÂ·3 *@"gopkg.in/mgo.v2".GridFS) OpenId (@"gopkg.in/mgo.v2".idÂ·4 interface {}) (@"gopkg.in/mgo.v2".fileÂ·1 *@"gopkg.in/mgo.v2".GridFile, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".gfsÂ·2 *@"gopkg.in/mgo.v2".GridFS) OpenNext (@"gopkg.in/mgo.v2".iterÂ·3 *@"gopkg.in/mgo.v2".Iter, @"gopkg.in/mgo.v2".fileÂ·4 **@"gopkg.in/mgo.v2".GridFile "esc:0x9") (? bool)
+	func (@"gopkg.in/mgo.v2".gfsÂ·2 *@"gopkg.in/mgo.v2".GridFS "esc:0x9") Remove (@"gopkg.in/mgo.v2".nameÂ·3 string) (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".gfsÂ·2 *@"gopkg.in/mgo.v2".GridFS "esc:0x9") RemoveId (@"gopkg.in/mgo.v2".idÂ·3 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".gfsÂ·2 *@"gopkg.in/mgo.v2".GridFS) @"gopkg.in/mgo.v2".newFile () (? *@"gopkg.in/mgo.v2".GridFile) { var @"gopkg.in/mgo.v2".fileÂ·3 *@"gopkg.in/mgo.v2".GridFile; ; @"gopkg.in/mgo.v2".fileÂ·3 = (&@"gopkg.in/mgo.v2".GridFile{ @"gopkg.in/mgo.v2".gfs:@"gopkg.in/mgo.v2".gfsÂ·2 }); @"gopkg.in/mgo.v2".fileÂ·3.@"gopkg.in/mgo.v2".c.L = &@"gopkg.in/mgo.v2".fileÂ·3.@"gopkg.in/mgo.v2".m; return @"gopkg.in/mgo.v2".fileÂ·3 }
+	type @"gopkg.in/mgo.v2".Role string
+	type @"gopkg.in/mgo.v2".User struct { Username string "bson:\"user\""; Password string "bson:\",omitempty\""; PasswordHash string "bson:\"pwd,omitempty\""; CustomData interface {} "bson:\"customData,omitempty\""; Roles []@"gopkg.in/mgo.v2".Role "bson:\"roles\""; OtherDBRoles map[string][]@"gopkg.in/mgo.v2".Role "bson:\"otherDBRoles,omitempty\""; UserSource string "bson:\"userSource,omitempty\"" }
+	type @"gopkg.in/mgo.v2".Database struct { Session *@"gopkg.in/mgo.v2".Session; Name string }
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) AddUser (@"gopkg.in/mgo.v2".usernameÂ·3 string, @"gopkg.in/mgo.v2".passwordÂ·4 string, @"gopkg.in/mgo.v2".readOnlyÂ·5 bool) (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) C (@"gopkg.in/mgo.v2".nameÂ·3 string) (? *@"gopkg.in/mgo.v2".Collection) { return (&@"gopkg.in/mgo.v2".Collection{ Database:@"gopkg.in/mgo.v2".dbÂ·2, Name:@"gopkg.in/mgo.v2".nameÂ·3, FullName:@"gopkg.in/mgo.v2".dbÂ·2.Name + "." + @"gopkg.in/mgo.v2".nameÂ·3 }) }
+	func (@"gopkg.in/mgo.v2".dbÂ·3 *@"gopkg.in/mgo.v2".Database) CollectionNames () (@"gopkg.in/mgo.v2".namesÂ·1 []string, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0x9") DropDatabase () (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) FindRef (@"gopkg.in/mgo.v2".refÂ·3 *@"gopkg.in/mgo.v2".DBRef "esc:0x2a") (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) GridFS (@"gopkg.in/mgo.v2".prefixÂ·3 string "esc:0x1") (? *@"gopkg.in/mgo.v2".GridFS) { return @"gopkg.in/mgo.v2".newGridFS(@"gopkg.in/mgo.v2".dbÂ·2, @"gopkg.in/mgo.v2".prefixÂ·3) }
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0x9") Login (@"gopkg.in/mgo.v2".userÂ·3 string, @"gopkg.in/mgo.v2".passÂ·4 string) (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·1 *@"gopkg.in/mgo.v2".Database "esc:0x9") Logout ()
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) RemoveUser (@"gopkg.in/mgo.v2".userÂ·3 string) (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0x9") Run (@"gopkg.in/mgo.v2".cmdÂ·3 interface {}, @"gopkg.in/mgo.v2".resultÂ·4 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database) UpsertUser (@"gopkg.in/mgo.v2".userÂ·3 *@"gopkg.in/mgo.v2".User "esc:0x9") (? error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0xa") With (@"gopkg.in/mgo.v2".sÂ·3 *@"gopkg.in/mgo.v2".Session) (? *@"gopkg.in/mgo.v2".Database) { var @"gopkg.in/mgo.v2".newdbÂ·4 @"gopkg.in/mgo.v2".Database; ; @"gopkg.in/mgo.v2".newdbÂ·4 = *@"gopkg.in/mgo.v2".dbÂ·2; @"gopkg.in/mgo.v2".newdbÂ·4.Session = @"gopkg.in/mgo.v2".sÂ·3; return &@"gopkg.in/mgo.v2".newdbÂ·4 }
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0x9") @"gopkg.in/mgo.v2".run (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket, @"gopkg.in/mgo.v2".cmdÂ·4 interface {}, @"gopkg.in/mgo.v2".resultÂ·5 interface {}) (@"gopkg.in/mgo.v2".errÂ·1 error)
+	func (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database "esc:0x9") @"gopkg.in/mgo.v2".runUserCmd (@"gopkg.in/mgo.v2".cmdNameÂ·3 string, @"gopkg.in/mgo.v2".userÂ·4 *@"gopkg.in/mgo.v2".User "esc:0x9") (? error)
+	type @"gopkg.in/mgo.v2".Safe struct { W int; WMode string; WTimeout int; FSync bool; J bool }
+	type @"gopkg.in/mgo.v2".Session struct { @"gopkg.in/mgo.v2".m @"sync".RWMutex; @"gopkg.in/mgo.v2".cluster_ *@"gopkg.in/mgo.v2".mongoCluster; @"gopkg.in/mgo.v2".slaveSocket *@"gopkg.in/mgo.v2".mongoSocket; @"gopkg.in/mgo.v2".masterSocket *@"gopkg.in/mgo.v2".mongoSocket; @"gopkg.in/mgo.v2".slaveOk bool; @"gopkg.in/mgo.v2".consistency @"gopkg.in/mgo.v2".Mode; @"gopkg.in/mgo.v2".queryConfig @"gopkg.in/mgo.v2".query; @"gopkg.in/mgo.v2".safeOp *@"gopkg.in/mgo.v2".queryOp; @"gopkg.in/mgo.v2".syncTimeout @"time".Duration; @"gopkg.in/mgo.v2".sockTimeout @"time".Duration; @"gopkg.in/mgo.v2".defaultdb string; @"gopkg.in/mgo.v2".sourcedb string; @"gopkg.in/mgo.v2".dialCred *@"gopkg.in/mgo.v2".Credential; @"gopkg.in/mgo.v2".creds []@"gopkg.in/mgo.v2".Credential; @"gopkg.in/mgo.v2".poolLimit int; @"gopkg.in/mgo.v2".bypassValidation bool }
+	func (@"gopkg.in/mgo.v2".sÂ·3 *@"gopkg.in/mgo.v2".Session) BuildInfo () (@"gopkg.in/mgo.v2".infoÂ·1 @"gopkg.in/mgo.v2".BuildInfo, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Clone () (? *@"gopkg.in/mgo.v2".Session)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) Close ()
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Copy () (? *@"gopkg.in/mgo.v2".Session)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) DB (@"gopkg.in/mgo.v2".nameÂ·3 string) (? *@"gopkg.in/mgo.v2".Database) { if @"gopkg.in/mgo.v2".nameÂ·3 == "" { @"gopkg.in/mgo.v2".nameÂ·3 = @"gopkg.in/mgo.v2".sÂ·2.@"gopkg.in/mgo.v2".defaultdb }; return (&@"gopkg.in/mgo.v2".Database{ Session:@"gopkg.in/mgo.v2".sÂ·2, Name:@"gopkg.in/mgo.v2".nameÂ·3 }) }
+	func (@"gopkg.in/mgo.v2".sÂ·3 *@"gopkg.in/mgo.v2".Session) DatabaseNames () (@"gopkg.in/mgo.v2".namesÂ·1 []string, @"gopkg.in/mgo.v2".errÂ·2 error)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) EnsureSafe (@"gopkg.in/mgo.v2".safeÂ·2 *@"gopkg.in/mgo.v2".Safe)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) FindRef (@"gopkg.in/mgo.v2".refÂ·3 *@"gopkg.in/mgo.v2".DBRef) (? *@"gopkg.in/mgo.v2".Query)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Fsync (@"gopkg.in/mgo.v2".asyncÂ·3 bool) (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) FsyncLock () (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) FsyncUnlock () (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) LiveServers () (@"gopkg.in/mgo.v2".addrsÂ·1 []string)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Login (@"gopkg.in/mgo.v2".credÂ·3 *@"gopkg.in/mgo.v2".Credential "esc:0x9") (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) LogoutAll ()
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Mode () (? @"gopkg.in/mgo.v2".Mode)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) New () (? *@"gopkg.in/mgo.v2".Session)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Ping () (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) Refresh ()
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session "esc:0x9") ResetIndexCache ()
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Run (@"gopkg.in/mgo.v2".cmdÂ·3 interface {}, @"gopkg.in/mgo.v2".resultÂ·4 interface {}) (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session) Safe () (@"gopkg.in/mgo.v2".safeÂ·1 *@"gopkg.in/mgo.v2".Safe)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SelectServers (@"gopkg.in/mgo.v2".tagsÂ·2 ...@"gopkg.in/mgo.v2/bson".D)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetBatch (@"gopkg.in/mgo.v2".nÂ·2 int)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetBypassValidation (@"gopkg.in/mgo.v2".bypassÂ·2 bool)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetCursorTimeout (@"gopkg.in/mgo.v2".dÂ·2 @"time".Duration)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetMode (@"gopkg.in/mgo.v2".consistencyÂ·2 @"gopkg.in/mgo.v2".Mode, @"gopkg.in/mgo.v2".refreshÂ·3 bool)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetPoolLimit (@"gopkg.in/mgo.v2".limitÂ·2 int)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetPrefetch (@"gopkg.in/mgo.v2".pÂ·2 float64)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetSafe (@"gopkg.in/mgo.v2".safeÂ·2 *@"gopkg.in/mgo.v2".Safe)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetSocketTimeout (@"gopkg.in/mgo.v2".dÂ·2 @"time".Duration)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) SetSyncTimeout (@"gopkg.in/mgo.v2".dÂ·2 @"time".Duration)
+	func (@"gopkg.in/mgo.v2".sÂ·3 *@"gopkg.in/mgo.v2".Session) @"gopkg.in/mgo.v2".acquireSocket (@"gopkg.in/mgo.v2".slaveOkÂ·4 bool) (? *@"gopkg.in/mgo.v2".mongoSocket, ? error)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session "esc:0x22") @"gopkg.in/mgo.v2".cluster () (? *@"gopkg.in/mgo.v2".mongoCluster)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) @"gopkg.in/mgo.v2".ensureSafe (@"gopkg.in/mgo.v2".safeÂ·2 *@"gopkg.in/mgo.v2".Safe)
+	func (@"gopkg.in/mgo.v2".sessionÂ·2 *@"gopkg.in/mgo.v2".Session) @"gopkg.in/mgo.v2".nonEventual () (? *@"gopkg.in/mgo.v2".Session)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session) @"gopkg.in/mgo.v2".prepareQuery (@"gopkg.in/mgo.v2".opÂ·2 *@"gopkg.in/mgo.v2".queryOp "esc:0x1")
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session "esc:0x1") @"gopkg.in/mgo.v2".setSocket (@"gopkg.in/mgo.v2".socketÂ·2 *@"gopkg.in/mgo.v2".mongoSocket)
+	func (@"gopkg.in/mgo.v2".sÂ·2 *@"gopkg.in/mgo.v2".Session "esc:0x9") @"gopkg.in/mgo.v2".socketLogin (@"gopkg.in/mgo.v2".socketÂ·3 *@"gopkg.in/mgo.v2".mongoSocket) (? error)
+	func (@"gopkg.in/mgo.v2".sÂ·1 *@"gopkg.in/mgo.v2".Session "esc:0x9") @"gopkg.in/mgo.v2".unsetSocket ()
+	type @"gopkg.in/mgo.v2/bson".ObjectId string
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) Counter () (? int32)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId "esc:0x1") Hex () (? string)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) Machine () (? []byte)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·3 @"gopkg.in/mgo.v2/bson".ObjectId) MarshalJSON () (? []byte, ? error)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·3 @"gopkg.in/mgo.v2/bson".ObjectId) MarshalText () (? []byte, ? error)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) Pid () (? uint16)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) String () (? string)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) Time () (? @"time".Time)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 *@"gopkg.in/mgo.v2/bson".ObjectId "esc:0x1") UnmarshalJSON (@"gopkg.in/mgo.v2/bson".dataÂ·3 []byte "esc:0x1") (? error)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 *@"gopkg.in/mgo.v2/bson".ObjectId "esc:0x1") UnmarshalText (@"gopkg.in/mgo.v2/bson".dataÂ·3 []byte) (? error)
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId "esc:0x1") Valid () (? bool) { return len(@"gopkg.in/mgo.v2/bson".idÂ·2) == 0xc }
+	func (@"gopkg.in/mgo.v2/bson".idÂ·2 @"gopkg.in/mgo.v2/bson".ObjectId) @"gopkg.in/mgo.v2/bson".byteSlice (@"gopkg.in/mgo.v2/bson".startÂ·3 int, @"gopkg.in/mgo.v2/bson".endÂ·4 int) (? []byte)
+	type @"util/mongodb".Instance struct { @"util/mongodb".opts @"util/mongodb".ConnectOpt; @"util/mongodb".session *@"gopkg.in/mgo.v2".Session }
+	func (@"util/mongodb".thisÂ·3 *@"util/mongodb".Instance "esc:0x1") CheckObjectId (@"util/mongodb".idÂ·4 string) (? @"gopkg.in/mgo.v2/bson".ObjectId, ? error)
+	func (@"util/mongodb".thisÂ·2 *@"util/mongodb".Instance) Collection (@"util/mongodb".nameÂ·3 string "esc:0x1") (? *@"gopkg.in/mgo.v2".Collection) { return @"util/mongodb".thisÂ·2.@"util/mongodb".session.DB(@"util/mongodb".thisÂ·2.@"util/mongodb".opts.Database).C(@"util/mongodb".thisÂ·2.@"util/mongodb".opts.Collections[@"util/mongodb".nameÂ·3]) }
+	func (@"util/mongodb".thisÂ·2 *@"util/mongodb".Instance "esc:0xa") DB () (? *@"gopkg.in/mgo.v2".Database) { return @"util/mongodb".thisÂ·2.@"util/mongodb".session.DB(@"util/mongodb".thisÂ·2.@"util/mongodb".opts.Database) }
+	type @"model".TimeStamp struct { CreatedTime @"time".Time "json:\"created_time,omitempty\""; UpdateTime @"time".Time "json:\"update_time,omitempty\"" }
+	type @"model".Deleted struct { IsDeleted bool "json:\"deleted\"" }
+	type @"model".Common struct { ? @"model".TimeStamp; ? @"model".Deleted; Id @"gopkg.in/mgo.v2/bson".ObjectId "bson:\"_id,omitempty\" json:\"id,omitempty\"" }
+	type @"model".Guest struct { ? @"model".Common "bson:\",inline\""; FullName string "json:\"fullname\""; Email string "json:\"email\""; Phone string "json:\"phone\""; RegTime string "json:\"regtime\""; Address string "json:\"address\""; HomeTown string "json:\"hometown\"" }
+	type @"".GuestStore struct { @"".mgoDB *@"util/mongodb".Instance }
+	func (@"".thisÂ·2 *@"".GuestStore "esc:0x9") Create (@"".guestÂ·3 *@"model".Guest) (? error)
+	func (@"".thisÂ·2 *@"".GuestStore "esc:0x9") Delete (@"".guestIdÂ·3 string) (? error)
+	func (@"".thisÂ·3 *@"".GuestStore "esc:0x9") Get (@"".guestIdÂ·4 string) (@"".guestÂ·1 *@"model".Guest, @"".errÂ·2 error)
+	func (@"".thisÂ·3 *@"".GuestStore "esc:0x9") List () (@"".guestsÂ·1 []@"model".Guest, @"".errÂ·2 error)
+	func (@"".thisÂ·2 *@"".GuestStore "esc:0x9") Update (@"".guestIdÂ·3 string, @"".guestÂ·4 *@"model".Guest "esc:0x9") (? error)
+	func @"".NewGuestStore (@"".dbÂ·2 *@"util/mongodb".Instance) (? *@"".GuestStore) { return (&@"".GuestStore{ @"".mgoDB:@"".dbÂ·2 }) }
+	func @"".init ()
+	type @"sync".rlocker struct { @"sync".w @"sync".Mutex; @"sync".writerSem uint32; @"sync".readerSem uint32; @"sync".readerCount int32; @"sync".readerWait int32 }
+	func (@"sync".rÂ·1 *@"sync".rlocker) Lock ()
+	func (@"sync".rÂ·1 *@"sync".rlocker) Unlock ()
+	func @"net".IPv4 (@"net".aÂ·2 byte, @"net".bÂ·3 byte, @"net".cÂ·4 byte, @"net".dÂ·5 byte) (? @"net".IP) { var @"net".pÂ·6 @"net".IP; ; @"net".pÂ·6 = make(@"net".IP, 0x10); copy(@"net".pÂ·6, @"net".v4InV6Prefix); @"net".pÂ·6[0xc] = @"net".aÂ·2; @"net".pÂ·6[0xd] = @"net".bÂ·3; @"net".pÂ·6[0xe] = @"net".cÂ·4; @"net".pÂ·6[0xf] = @"net".dÂ·5; return @"net".pÂ·6 }
+	var @"time".months [12]string
+	var @"time".days [7]string
+	var @"time".Local *@"time".Location
+	var @"time".UTC *@"time".Location
+	func @"gopkg.in/mgo.v2".newGridFS (@"gopkg.in/mgo.v2".dbÂ·2 *@"gopkg.in/mgo.v2".Database, @"gopkg.in/mgo.v2".prefixÂ·3 string "esc:0x1") (? *@"gopkg.in/mgo.v2".GridFS) { return (&@"gopkg.in/mgo.v2".GridFS{ Files:@"gopkg.in/mgo.v2".dbÂ·2.C(@"gopkg.in/mgo.v2".prefixÂ·3 + ".files"), Chunks:@"gopkg.in/mgo.v2".dbÂ·2.C(@"gopkg.in/mgo.v2".prefixÂ·3 + ".chunks") }) }
+	var @"net".v4InV6Prefix []byte
+
+$$
+_go_.o          0           0     0     644     46803     `
+go object darwin amd64 go1.5.3 X:none
+
+!
+  go13ldutil/mongodb.amodel.autil/logs.a,gopkg.in/mgo.v2/bson.a ş "".NewGuestStore  à  ÜeH‹%    H;avXHƒìH    H‰$è    H‹D$H‰D$Hƒø t0H‹l$ €=     uH‰(H‰D$(HƒÄÃH‰$H‰l$è    H‹D$ëá‰ ëÌè    ë’
+      ,  $type."".GuestStore   >
+  "runtime.newobject   t 6runtime.writeBarrierEnabled   °
+  .runtime.writebarrierptr   Ğ
+  0runtime.morestack_noctxt    0  "".autotmp_0002 &type.*"".GuestStore "".~r1 &type.*"".GuestStore 
+"".db  6type.*util/mongodb.Instance 0:/0" p "1
+	  9 TgclocalsÂ·32bd5c6dc84e3e86dd35593b3922d3aa TgclocalsÂ·0c8aa8e80191a30eac23f1a218103f16   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş*"".(*GuestStore).List  À  ¦eH‹%    HD$H;A†1  Hìğ   1ÛH‰œ$   H‰œ$  H‰œ$  H    H‰$è    H‹\$H‰\$p1Û1ÛH‰œ$  H‰œ$   H‹œ$ø   H‹H    H‰œ$ˆ   HÇ„$      H‹H8H‰L$PH‰D$HH‹h H‰l$xH‹h(H‰¬$€   Hƒı u%Hƒù „‚  H‹©H  H‰l$xH‹©P  H‰¬$€   H    H‰$è    H‹D$H‰D$hHƒø „<  H‹l$P€=     …  H‰(H‹¬$€   H‰hH‹l$x€=     …Õ  H‰hH‰D$XH‹Œ$ˆ   H‹„$   H    H‰$H‹\$HH‹k0H‰l$H‰Œ$¸   H‰L$H‰„$À   H‰D$è    H‹|$XH‹\$ Hƒû „i  L‹H‹S1ÀH‰„$È   H‰„$Ğ   H‰„$Ø   H‰„$à   H‰„$è   H„$È   H‰8H‰D$`L‰@H‰PHÇ$    Hƒÿ „  H_H|$H‹H‰H‹KH‰OH    H‰\$HÇD$    L‰„$˜   L‰D$(H‰”$    H‰T$0è    H‹D$`H\$8Hƒø „¡   HhH‹H‰M H‹KH‰MH‰$1ÛH‰\$H‰\$è    H‹L$H‹D$pH‰$H    H‰œ$¨   H‰\$H‰„$°   H‰D$è    H‹\$H‰œ$  H‹\$ H‰œ$   H‹t$pH¼$   H‹H‰H‹NH‰OH‹NH‰OHÄğ   Ã‰ éXÿÿÿ‰éòşÿÿ‰éşÿÿL@L‰$H‰l$è    H‹D$héşÿÿH‰$H‰l$è    H‹D$héÙıÿÿ‰ é½ıÿÿ‰éwıÿÿè    é­üÿÿ$
+      x  $type.[]model.Guest   Š
+  "runtime.newobject   ê  "go.string."GUEST"   ¼  >type.gopkg.in/mgo%2ev2.Database   Î
+  "runtime.newobject   Œ 6runtime.writeBarrierEnabled   Î 6runtime.writeBarrierEnabled   œ  ,type.map[string]string   ş
+  4runtime.mapaccess1_faststr   ˜  go.string."."   ò
+  *runtime.concatstring3   ê	
+  Hgopkg.in/mgo%2ev2.(*Collection).Find   ”
+  &type.*[]model.Guest   Ò
+
+  <gopkg.in/mgo%2ev2.(*Query).All   ª
+  .runtime.writebarrierptr   Ú
+  .runtime.writebarrierptr   ”
+  0runtime.morestack_noctxt   `à   "".autotmp_0012  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0011 OBtype.gopkg.in/mgo%2ev2.Collection "".autotmp_0010 ŸDtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0009  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0008 @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0007  @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0003 otype.string "".&guests ÿ&type.*[]model.Guest 2gopkg.in/mgo%2ev2.nameÂ·3 ¯type.string .gopkg.in/mgo%2ev2.dbÂ·2 ¯@type.*gopkg.in/mgo%2ev2.Database 2gopkg.in/mgo%2ev2.nameÂ·3 ïtype.string ,gopkg.in/mgo%2ev2.sÂ·2 ¿>type.*gopkg.in/mgo%2ev2.Session (util/mongodb.nameÂ·3 Ïtype.string (util/mongodb.thisÂ·2 Ï6type.*util/mongodb.Instance "".err @type.error "".this  &type.*"".GuestStore àÒßàn à .gà#W * D¢˜º< 4 TgclocalsÂ·0eb8895aada11c3eccf0d9ced3582bb1 TgclocalsÂ·409403ea6142636df751c79e7ef7f1af   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş."".(*GuestStore).Create     ”eH‹%    H„$pÿÿÿH;A†e  Hì  1ÛH‰œ$(  H‰œ$0  H‹œ$  H‹H    H‰œ$   HÇ„$˜      H‹H8H‰L$XH‰D$PH‹h H‰¬$€   H‹h(H‰¬$ˆ   Hƒı u(Hƒù „é  H‹©H  H‰¬$€   H‹©P  H‰¬$ˆ   H    H‰$è    H‹D$H‰D$pHƒø „   H‹l$X€=     …v  H‰(H‹¬$ˆ   H‰hH‹¬$€   €=     …6  H‰hH‰D$`H‹Œ$   H‹„$˜   H    H‰$H‹\$PH‹k0H‰l$H‰Œ$À   H‰L$H‰„$È   H‰D$è    H‹|$`H‹\$ Hƒû „Ê  L‹H‹S1ÀH‰„$è   H‰„$ğ   H‰„$ø   H‰„$   H‰„$  H„$è   H‰8H‰D$hL‰@H‰PHÇ$    Hƒÿ „h  H_H|$H‹H‰H‹KH‰OH    H‰\$HÇD$    L‰„$    L‰D$(H‰”$¨   H‰T$0è    H‹D$hH\$8Hƒø „  HhH‹H‰M H‹KH‰MH‰D$HH‹œ$   H‰\$xH    H‰$è    H‹T$Hƒú „·   HÇ„$Ø      HÇ„$à      H‹L$xH    H‰”$Ğ   H‰œ$°   H‰H‰Œ$¸   €=     uSH‰JH‹\$HH‰$H‰T$H‹œ$Ø   H‰\$H‹œ$à   H‰\$è    H‹L$ H‹D$(H‰Œ$(  H‰„$0  HÄ  ÃLBL‰$H‰L$è    H‹”$Ğ   ë•‰éBÿÿÿ‰ é÷şÿÿ‰é‘şÿÿ‰é/şÿÿL@L‰$H‰l$è    H‹D$pé²ıÿÿH‰$H‰l$è    H‹D$péuıÿÿ‰ éYıÿÿ‰éıÿÿè    évüÿÿ&
+      „  "go.string."GUEST"   â  >type.gopkg.in/mgo%2ev2.Database   ô
+  "runtime.newobject   ² 6runtime.writeBarrierEnabled   ú 6runtime.writeBarrierEnabled   È  ,type.map[string]string   ª
+  4runtime.mapaccess1_faststr   Ä  go.string."."   
+  *runtime.concatstring3   	  (type.[1]interface {}   °	
+  "runtime.newobject   –
+  "type.*model.Guest   Ø
+ 6runtime.writeBarrierEnabled   À
+  Lgopkg.in/mgo%2ev2.(*Collection).Insert   ¨
+  .runtime.writebarrierptr   ˜
+  .runtime.writebarrierptr   È
+  .runtime.writebarrierptr   ‚
+  0runtime.morestack_noctxt   @   &"".autotmp_0025 &type.[]interface {} "".autotmp_0024  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0023 OBtype.gopkg.in/mgo%2ev2.Collection "".autotmp_0022 ÏDtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0021  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0020 ¿@type.*gopkg.in/mgo%2ev2.Database "".autotmp_0019  @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0017 ¯"type.*model.Guest "".autotmp_0015 Ÿtype.string 2gopkg.in/mgo%2ev2.nameÂ·3 ßtype.string .gopkg.in/mgo%2ev2.dbÂ·2 ß@type.*gopkg.in/mgo%2ev2.Database 2gopkg.in/mgo%2ev2.nameÂ·3 Ÿtype.string ,gopkg.in/mgo%2ev2.sÂ·2 ï>type.*gopkg.in/mgo%2ev2.Session "".~r0 Dtype.*gopkg.in/mgo%2ev2.Collection (util/mongodb.nameÂ·3 ÿtype.string (util/mongodb.thisÂ·2 ÿ6type.*util/mongodb.Instance "".~r1  type.error "".guest "type.*model.Guest "".this  &type.*"".GuestStore " ãŸ Š  :4Ì . ¹›ºIˆ48- TgclocalsÂ·573eebd23f15bbede97c85018d63627a TgclocalsÂ·58ecbdf5342fa1ac4d27eee8bf156531   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş("".(*GuestStore).Get  à  ÂeH‹%    H„$hÿÿÿH;A†ü  Hì  HÇ„$8      H    H‰$è    H‹\$H‰\$x1Û1ÛH‰œ$@  H‰œ$H  H‹œ$   H‹+H‰,$H‹œ$(  H‰\$H‹œ$0  H‰\$è    H‹L$xH‹\$H‰œ$°   H‹\$ H‰œ$¸   H‹D$(H‹\$0H‰œ$H  H‰„$@  Hƒø tHÇ    H‹)H‰¬$8  HÄ  ÃH‹œ$   H‹H    H‰œ$   HÇ„$˜      H‹H8H‰L$XH‰D$PH‹h H‰¬$€   H‹h(H‰¬$ˆ   Hƒı u(Hƒù „Ñ  H‹©H  H‰¬$€   H‹©P  H‰¬$ˆ   H    H‰$è    H‹D$H‰D$pHƒø „ˆ  H‹l$X€=     …^  H‰(H‹¬$ˆ   H‰hH‹¬$€   €=     …  H‰hH‰D$`H‹Œ$   H‹„$˜   H    H‰$H‹\$PH‹k0H‰l$H‰Œ$à   H‰L$H‰„$è   H‰D$è    H‹|$`H‹\$ Hƒû „²  L‹H‹S1ÀH‰„$ğ   H‰„$ø   H‰„$   H‰„$  H‰„$  H„$ğ   H‰8H‰D$hL‰@H‰PHÇ$    Hƒÿ „P  H_H|$H‹H‰H‹KH‰OH    H‰\$HÇD$    L‰„$    L‰D$(H‰”$¨   H‰T$0è    H‹D$hH\$8Hƒø „ê   HhH‹H‰M H‹KH‰MH‰D$HH‹œ$°   H‰œ$Ğ   H‹œ$¸   H‰œ$Ø   H    H‰$Hœ$Ğ   H‰\$HÇD$    è    H\$H|$H‹H‰H‹KH‰OH‹\$HH‰$è    H‹L$H‹D$xH‰$H    H‰œ$À   H‰\$H‰„$È   H‰D$è    H‹\$H‰œ$@  H‹\$ H‰œ$H  H‹\$xH‹+H‰¬$8  HÄ  Ã‰ éÿÿÿ‰é©şÿÿ‰éGşÿÿL@L‰$H‰l$è    H‹D$péÊıÿÿH‰$H‰l$è    H‹D$péıÿÿ‰ éqıÿÿ‰é(ıÿÿè    éßûÿÿ*
+      b  "type.*model.Guest   t
+  "runtime.newobject   Œ
+  Lutil/mongodb.(*Instance).CheckObjectId   â  "go.string."GUEST"   À  >type.gopkg.in/mgo%2ev2.Database   Ò
+  "runtime.newobject    6runtime.writeBarrierEnabled   Ø 6runtime.writeBarrierEnabled   ¦  ,type.map[string]string   ˆ
+  4runtime.mapaccess1_faststr   ¢
+  go.string."."   ü
+
+  *runtime.concatstring3   ¢  Dtype.gopkg.in/mgo.v2/bson.ObjectId   à
+  runtime.convT2E   ¬
+  Lgopkg.in/mgo%2ev2.(*Collection).FindId   Ö  $type.**model.Guest   ”
+  <gopkg.in/mgo%2ev2.(*Query).One   Æ
+  .runtime.writebarrierptr   ö
+  .runtime.writebarrierptr   °
+  0runtime.morestack_noctxt   `°  ("".autotmp_0039  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0038 OBtype.gopkg.in/mgo%2ev2.Collection "".autotmp_0037 ßDtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0036  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0035 Ï@type.*gopkg.in/mgo%2ev2.Database "".autotmp_0034  @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0031 Dtype.gopkg.in/mgo.v2/bson.ObjectId "".autotmp_0029 otype.string "".&guest ¿$type.**model.Guest 2gopkg.in/mgo%2ev2.nameÂ·3 ïtype.string .gopkg.in/mgo%2ev2.dbÂ·2 ï@type.*gopkg.in/mgo%2ev2.Database 2gopkg.in/mgo%2ev2.nameÂ·3 ¯type.string ,gopkg.in/mgo%2ev2.sÂ·2 ÿ>type.*gopkg.in/mgo%2ev2.Session "".~r0 ŸDtype.*gopkg.in/mgo%2ev2.Collection (util/mongodb.nameÂ·3 type.string (util/mongodb.thisÂ·2 6type.*util/mongodb.Instance "".guestObjId ÏDtype.gopkg.in/mgo.v2/bson.ObjectId "".err @type.error "".guestId type.string "".this  &type.*"".GuestStore ("°À¯°Ü¯°p ° 0B\_ÅW 2 9Lã›ºr&6 TgclocalsÂ·dbe225b1632f2406d881b3dde3efb7df TgclocalsÂ·f021f34b89ecbf1af4e84fc0fe288558   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş."".(*GuestStore).Update     ŠeH‹%    H„$`ÿÿÿH;A†`  Hì   1ÛH‰œ$H  H‰œ$P  H‹œ$(  H‰$H‹œ$0  H‰\$H‹œ$8  H‰\$è    H‹T$H‹D$ H‹L$(H‰Œ$À   H‰„$¸   Hƒø tH‰„$H  H‰Œ$P  HÄ   ÃH‹œ$@  Hƒû „Æ  HkHH‰T$`Hƒú „¬  LBHL‰D$H‰l$H-    H‰,$è    H‹œ$@  Hƒû „u  H«ˆ   H‹\$`Hƒû „X  Lƒˆ   L‰D$H‰l$H-    H‰,$è    H‹œ$@  Hƒû „  HkXH‹\$`Hƒû „  LCXL‰D$H‰l$H-    H‰,$è    H‹œ$@  Hƒû „Í  H«˜   H‹\$`Hƒû „°  Lƒ˜   L‰D$H‰l$H-    H‰,$è    H‹œ$@  Hƒû „v  HkhH‹\$`Hƒû „\  LChL‰D$H‰l$H-    H‰,$è    H‹œ$(  H‹H    H‰œ$ˆ   HÇ„$      H‹H8H‰L$XH‰D$PH‹h H‰¬$˜   H‹h(H‰¬$    Hƒı u(Hƒù „Û  H‹©H  H‰¬$˜   H‹©P  H‰¬$    H    H‰$è    H‹D$H‰D$xHƒø „’  H‹l$X€=     …h  H‰(H‹¬$    H‰hH‹¬$˜   €=     …(  H‰hH‰D$hH‹Œ$ˆ   H‹„$   H    H‰$H‹\$PH‹k0H‰l$H‰Œ$è   H‰L$H‰„$ğ   H‰D$è    H‹|$hH‹\$ Hƒû „¼  L‹H‹S1ÀH‰„$ø   H‰„$   H‰„$  H‰„$  H‰„$  H„$ø   H‰8H‰D$pL‰@H‰PHÇ$    Hƒÿ „Z  H_H|$H‹H‰H‹KH‰OH    H‰\$HÇD$    L‰„$¨   L‰D$(H‰”$°   H‰T$0è    H‹D$pH\$8Hƒø „ô   HhH‹H‰M H‹KH‰MH‰D$HH‹œ$0  H‰$H‹œ$8  H‰\$è    H‹\$H‰œ$Ø   H‹\$H‰œ$à   H‹\$`H‰œ$€   H    H‰$Hœ$Ø   H‰\$HÇD$    è    H\$H|$H‹H‰H‹KH‰OH‹D$HH‰$H‹Œ$€   H    H‰„$È   H‰D$H‰Œ$Ğ   H‰L$ è    H‹L$(H‹D$0H‰Œ$H  H‰„$P  HÄ   Ã‰ éÿÿÿ‰éŸşÿÿ‰é=şÿÿL@L‰$H‰l$è    H‹D$xéÀıÿÿH‰$H‰l$è    H‹D$xéƒıÿÿ‰ égıÿÿ‰éıÿÿ‰éüÿÿ‰éƒüÿÿ‰éIüÿÿ‰é,üÿÿ‰éõûÿÿ‰éÛûÿÿ‰é¡ûÿÿ‰é„ûÿÿ‰éMûÿÿ‰é3ûÿÿè    é{úÿÿ:
+      ¶
+  ("".(*GuestStore).Get   ¤  type.string   ¶
+  (runtime.typedmemmove   ¶  type.string   È
+  (runtime.typedmemmove   ¼  type.string   Î
+  (runtime.typedmemmove   Î  type.string   à
+  (runtime.typedmemmove   Ô  type.string   æ
+  (runtime.typedmemmove   Š  "go.string."GUEST"   è	  >type.gopkg.in/mgo%2ev2.Database   ú	
+  "runtime.newobject   ¸
+ 6runtime.writeBarrierEnabled   € 6runtime.writeBarrierEnabled   Î  ,type.map[string]string   °
+  4runtime.mapaccess1_faststr   Ê  go.string."."   ¤
+  *runtime.concatstring3   ¸
+  @gopkg.in/mgo.v2/bson.ObjectIdHex   ”  Dtype.gopkg.in/mgo.v2/bson.ObjectId   Ò
+  runtime.convT2E   ²  "type.*model.Guest   ğ
+  Pgopkg.in/mgo%2ev2.(*Collection).UpdateId   ‚
+  .runtime.writebarrierptr   ²
+  .runtime.writebarrierptr   ø
+  0runtime.morestack_noctxt   `À  ,"".autotmp_0051  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0050 OBtype.gopkg.in/mgo%2ev2.Collection "".autotmp_0049 ßDtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0048  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0047 Ï@type.*gopkg.in/mgo%2ev2.Database "".autotmp_0046  @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0045 ¿"type.*model.Guest "".autotmp_0044 Dtype.gopkg.in/mgo.v2/bson.ObjectId "".autotmp_0042 otype.string 2gopkg.in/mgo%2ev2.nameÂ·3 ïtype.string .gopkg.in/mgo%2ev2.dbÂ·2 ï@type.*gopkg.in/mgo%2ev2.Database 2gopkg.in/mgo%2ev2.nameÂ·3 type.string ,gopkg.in/mgo%2ev2.sÂ·2 >type.*gopkg.in/mgo%2ev2.Session "".~r0 ¯Dtype.*gopkg.in/mgo%2ev2.Collection (util/mongodb.nameÂ·3 ¯type.string (util/mongodb.thisÂ·2 Ÿ6type.*util/mongodb.Instance "".err Ïtype.error "".guestServer ÿ"type.*model.Guest "".~r2 @type.error "".guest 0"type.*model.Guest "".guestId type.string "".this  &type.*"".GuestStore ("Ày¿ÀÁ¿À²  LX4BCICICÏW 6 Z€¢›ºJMOI	x TgclocalsÂ·6da170104ade2332614eac7ea882da55 TgclocalsÂ·338543e77e302223e816ce788b2f08e4   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş."".(*GuestStore).Delete  À  ÀeH‹%    HD$€H;A†~  Hì   1ÛH‰œ$   H‰œ$(  H‹œ$  H‰$H‹œ$  H‰\$H‹œ$  H‰\$è    H‹D$ H‹L$(H‰Œ$°   H‰„$¨   Hƒø tH‰„$   H‰Œ$(  HÄ   ÃH‹œ$  H‹H    H‰\$xHÇ„$€      H‹H8H‰L$XH‰D$PH‹h H‰¬$ˆ   H‹h(H‰¬$   Hƒı u(Hƒù „¢  H‹©H  H‰¬$ˆ   H‹©P  H‰¬$   H    H‰$è    H‹D$H‰D$pHƒø „Y  H‹l$X€=     …/  H‰(H‹¬$   H‰hH‹¬$ˆ   €=     …ï  H‰hH‰D$`H‹L$xH‹„$€   H    H‰$H‹\$PH‹k0H‰l$H‰Œ$È   H‰L$H‰„$Ğ   H‰D$è    H‹|$`H‹\$ Hƒû „†  L‹H‹S1ÀH‰„$Ø   H‰„$à   H‰„$è   H‰„$ğ   H‰„$ø   H„$Ø   H‰8H‰D$hL‰@H‰PHÇ$    Hƒÿ „$  H_H|$H‹H‰H‹KH‰OH    H‰\$HÇD$    L‰„$˜   L‰D$(H‰”$    H‰T$0è    H‹D$hH\$8Hƒø „¾   HhH‹H‰M H‹KH‰MH‰D$HH‹œ$  H‰$H‹œ$  H‰\$è    H‹\$H‰œ$¸   H‹\$H‰œ$À   H    H‰$Hœ$¸   H‰\$HÇD$    è    H\$H|$H‹H‰H‹KH‰OH‹\$HH‰$è    H‹L$H‹D$ H‰Œ$   H‰„$(  HÄ   Ã‰ é;ÿÿÿ‰éÕşÿÿ‰ésşÿÿL@L‰$H‰l$è    H‹D$péùıÿÿH‰$H‰l$è    H‹D$pé¼ıÿÿ‰ é ıÿÿ‰éWıÿÿè    é`üÿÿ$
+      °
+  ("".(*GuestStore).Get   Ä  "go.string."GUEST"   œ  >type.gopkg.in/mgo%2ev2.Database   ®
+  "runtime.newobject   ì 6runtime.writeBarrierEnabled   ´ 6runtime.writeBarrierEnabled   ü  ,type.map[string]string   Ş
+  4runtime.mapaccess1_faststr   ø  go.string."."   Ò	
+  *runtime.concatstring3   æ
+
+  @gopkg.in/mgo.v2/bson.ObjectIdHex   ¨  Dtype.gopkg.in/mgo.v2/bson.ObjectId   æ
+  runtime.convT2E   ²
+  Pgopkg.in/mgo%2ev2.(*Collection).RemoveId   Ä
+  .runtime.writebarrierptr   ô
+  .runtime.writebarrierptr   ®
+  0runtime.morestack_noctxt   P€  &"".autotmp_0062  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0061 OBtype.gopkg.in/mgo%2ev2.Collection "".autotmp_0060 ¯Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0059  Dtype.*gopkg.in/mgo%2ev2.Collection "".autotmp_0058 Ÿ@type.*gopkg.in/mgo%2ev2.Database "".autotmp_0057  @type.*gopkg.in/mgo%2ev2.Database "".autotmp_0056 Dtype.gopkg.in/mgo.v2/bson.ObjectId "".autotmp_0054 otype.string 2gopkg.in/mgo%2ev2.nameÂ·3 Ïtype.string .gopkg.in/mgo%2ev2.dbÂ·2 ¿@type.*gopkg.in/mgo%2ev2.Database 2gopkg.in/mgo%2ev2.nameÂ·3 ïtype.string ,gopkg.in/mgo%2ev2.sÂ·2 Ï>type.*gopkg.in/mgo%2ev2.Session "".~r0 ïDtype.*gopkg.in/mgo%2ev2.Collection (util/mongodb.nameÂ·3 type.string (util/mongodb.thisÂ·2 ß6type.*util/mongodb.Instance "".err ¯type.error "".~r1 0type.error "".guestId type.string "".this  &type.*"".GuestStore &€tÿ€ªÿ€a   $|1=“W
+ 0 W¿˜ºJ@&I	' TgclocalsÂ·f7bc00999bd1534628103bfff5110d50 TgclocalsÂ·6f587b51afe034ad951a1798b2ad61c9   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş"".init  €  âeH‹%    H;a†”   Hƒì¶    €û t¶    €ûuHƒÄÃè    Æ    è    è    è    è    H    H‰$HÇD$
+   è    H‹\$€=     uH‰    Æ    HƒÄÃH-    H‰,$H‰\$è    ëİè    éOÿÿÿ"
+      4  "".initdoneÂ·   L  "".initdoneÂ·   j
+  "runtime.throwinit   z "".initdoneÂ·   †
+  "util/mongodb.init   
+  model.init   š
+  util/logs.init   ¤
+  2gopkg.in/mgo.v2/bson.init   ²  ,go.string."guestStore"   Ö
+  util/logs.New   ì 6runtime.writeBarrierEnabled   €  "".log   Œ "".initdoneÂ·   ¦  "".log   Â
+  .runtime.writebarrierptr   Ğ
+  0runtime.morestack_noctxt    0   0/0[/00 À Vw.xwx  4Œ TgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb TgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş(type..hash.[8]string à  ÊeH‹%    H;a†ˆ   Hƒì(H‹L$81ÀHÇD$   H‹l$H9è}\H‰D$ H‰ÅH‰ÈHÁÀH»¿c»kïR H¯ØH‰ØH‹\$0Hƒû t;HÁåHëH‰$H‰D$8H‰D$è    H‹L$H‹D$ HÿÀH‹l$H9è|¤H‰L$@HƒÄ(Ã‰ëÁè    é[ÿÿÿ
+      ä
+  runtime.strhash   ¸
+  0runtime.morestack_noctxt   0P  
+"".autotmp_0065 type.int "".autotmp_0064 type.int "".~r2  type.uintptr "".h type.uintptr "".p  type.*[8]string POP ° ° 
+ q? TgclocalsÂ·0b86ef39f3fed835f14ba5f4d7c62fa2 TgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş$type..eq.[8]string à  ÖeH‹%    H;a†Î   HƒìX1ÀHÇD$(   H‹l$(H9è’   H‰D$0H‹\$`Hƒû „–   H‰ÅHÁåHëH‹3H‹KH‹\$hHƒû tvH‰ÅHÁåHëH‹H‹CH9ÁuVH‰t$HH‰4$H‰L$PH‰L$H‰T$8H‰T$H‰D$@H‰D$è    ¶\$ €û t H‹D$0HÿÀH‹l$(H9èŒnÿÿÿÆD$pHƒÄXÃÆD$p HƒÄXÃ‰ë†‰écÿÿÿè    éÿÿÿ
+      ¼
+   runtime.eqstring   Ä
+  0runtime.morestack_noctxt   0°  "".autotmp_0069 ?type.string "".autotmp_0068 type.string "".autotmp_0067 _type.int "".autotmp_0066 Otype.int "".~r2  type.bool "".q type.*[8]string "".p  type.*[8]string &°´¯°	¯° ğ ğ  S TgclocalsÂ·3bb21ca8fe1d99a3e492463bd711418a TgclocalsÂ·a8eabfc4a4514ed6b3b0c61e9680e440   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş4type..hash.[1]interface {} à  ÊeH‹%    H;a†ˆ   Hƒì(H‹L$81ÀHÇD$   H‹l$H9è}\H‰D$ H‰ÅH‰ÈHÁÀH»¿c»kïR H¯ØH‰ØH‹\$0Hƒû t;HÁåHëH‰$H‰D$8H‰D$è    H‹L$H‹D$ HÿÀH‹l$H9è|¤H‰L$@HƒÄ(Ã‰ëÁè    é[ÿÿÿ
+      ä
+  (runtime.nilinterhash   ¸
+  0runtime.morestack_noctxt   0P  
+"".autotmp_0071 type.int "".autotmp_0070 type.int "".~r2  type.uintptr "".h type.uintptr "".p  *type.*[1]interface {} POP ° ° 
+ q? TgclocalsÂ·0b86ef39f3fed835f14ba5f4d7c62fa2 TgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goş0type..eq.[1]interface {} à  ÖeH‹%    H;a†Î   HƒìX1ÀHÇD$(   H‹l$(H9è’   H‰D$0H‹\$hHƒû „–   H‰ÅHÁåHëH‹H‹sH‹\$`Hƒû tvH‰ÅHÁåHëH‹H‹SH9ÈuVH‰D$8H‰$H‰T$@H‰T$H‰L$HH‰L$H‰t$PH‰t$è    ¶\$ €û t H‹D$0HÿÀH‹l$(H9èŒnÿÿÿÆD$pHƒÄXÃÆD$p HƒÄXÃ‰ë†‰écÿÿÿè    éÿÿÿ
+      ¼
+  runtime.efaceeq   Ä
+  0runtime.morestack_noctxt   0°  "".autotmp_0075 ?"type.interface {} "".autotmp_0074 "type.interface {} "".autotmp_0073 _type.int "".autotmp_0072 Otype.int "".~r2  type.bool "".q *type.*[1]interface {} "".p  *type.*[1]interface {} &°´¯°	¯° ğ ğ  S TgclocalsÂ·3bb21ca8fe1d99a3e492463bd711418a TgclocalsÂ·a8eabfc4a4514ed6b3b0c61e9680e440   ¸/Users/HuyJack/Documents/Study/project/harrsion-project/izi-guest-manager/src/store/guest.goşTgclocalsÂ·0c8aa8e80191a30eac23f1a218103f16                   şTgclocalsÂ·32bd5c6dc84e3e86dd35593b3922d3aa                  ş*go.string.hdr."GUEST"                       "go.string."GUEST"   ş"go.string."GUEST"   GUEST  ş"go.string.hdr."."                       go.string."."   şgo.string."."   .  şTgclocalsÂ·409403ea6142636df751c79e7ef7f1af H  H          c  q  1  $   (      şTgclocalsÂ·0eb8895aada11c3eccf0d9ced3582bb1 H  H                            şTgclocalsÂ·58ecbdf5342fa1ac4d27eee8bf156531 X  X	          †  ¢  "      ° A °  ²   °  şTgclocalsÂ·573eebd23f15bbede97c85018d63627a X  X	                                  şTgclocalsÂ·f021f34b89ecbf1af4e84fc0fe288558 X  X	          @   Æ"  â"  b"  H   P `A b@ b şTgclocalsÂ·dbe225b1632f2406d881b3dde3efb7df X  X	                                  şTgclocalsÂ·338543e77e302223e816ce788b2f08e4 `  `
+               J  J     ( À	 À Ä  Ä şTgclocalsÂ·6da170104ade2332614eac7ea882da55 `  `
+                                     şTgclocalsÂ·6f587b51afe034ad951a1798b2ad61c9 X  X	          F  b  b       ,  , @,  @,  şTgclocalsÂ·f7bc00999bd1534628103bfff5110d50 X  X	                                  ş4go.string.hdr."guestStore"             
+          ,go.string."guestStore"   ş,go.string."guestStore"    guestStore  şTgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb           şTgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb           ş."".log   type.*log.Logger   ş0"".initdoneÂ·  type.uint8   ş&"".NewGuestStoreÂ·f               "".NewGuestStore   ş0"".(*GuestStore).ListÂ·f              *"".(*GuestStore).List   ş4"".(*GuestStore).CreateÂ·f              ."".(*GuestStore).Create   ş."".(*GuestStore).GetÂ·f              ("".(*GuestStore).Get   ş4"".(*GuestStore).UpdateÂ·f              ."".(*GuestStore).Update   ş4"".(*GuestStore).DeleteÂ·f              ."".(*GuestStore).Delete   ş"".initÂ·f              "".init   ş"runtime.gcbits.01    şBgo.string.hdr."*store.GuestStore"                       :go.string."*store.GuestStore"   ş:go.string."*store.GuestStore" 0  $*store.GuestStore  şvgo.string.hdr."func(*store.GuestStore, *model.Guest) error"             +          ngo.string."func(*store.GuestStore, *model.Guest) error"   şngo.string."func(*store.GuestStore, *model.Guest) error" `  Xfunc(*store.GuestStore, *model.Guest) error  şZtype.func(*"".GuestStore, *model.Guest) error °  °              ìa9¹ 3                                                                                                                            0€  runtime.algarray   @  "runtime.gcbits.01   P  vgo.string.hdr."func(*store.GuestStore, *model.Guest) error"   p  lgo.weak.type.*func(*"".GuestStore, *model.Guest) error   €  "runtime.zerovalue    € Ztype.func(*"".GuestStore, *model.Guest) error   Ğ  Ztype.func(*"".GuestStore, *model.Guest) error   €  &type.*"".GuestStore     "type.*model.Guest      type.error   şÀgo.typelink.func(*store.GuestStore, *model.Guest) error	func(*"".GuestStore, *model.Guest) error              Ztype.func(*"".GuestStore, *model.Guest) error   şjgo.string.hdr."func(*store.GuestStore, string) error"             %          bgo.string."func(*store.GuestStore, string) error"   şbgo.string."func(*store.GuestStore, string) error" P  Lfunc(*store.GuestStore, string) error  şNtype.func(*"".GuestStore, string) error °  °              XU 3                                                                                                                            0€  runtime.algarray   @  "runtime.gcbits.01   P  jgo.string.hdr."func(*store.GuestStore, string) error"   p  `go.weak.type.*func(*"".GuestStore, string) error   €  "runtime.zerovalue    € Ntype.func(*"".GuestStore, string) error   Ğ  Ntype.func(*"".GuestStore, string) error   €  &type.*"".GuestStore     type.string      type.error   ş¨go.typelink.func(*store.GuestStore, string) error	func(*"".GuestStore, string) error              Ntype.func(*"".GuestStore, string) error   şŠgo.string.hdr."func(*store.GuestStore, string) (*model.Guest, error)"             5          ‚go.string."func(*store.GuestStore, string) (*model.Guest, error)"   ş‚go.string."func(*store.GuestStore, string) (*model.Guest, error)" p  lfunc(*store.GuestStore, string) (*model.Guest, error)  şntype.func(*"".GuestStore, string) (*model.Guest, error) À  À              Mğ_ 3                                                                                                                                    0€  runtime.algarray   @  "runtime.gcbits.01   P  Šgo.string.hdr."func(*store.GuestStore, string) (*model.Guest, error)"   p  €go.weak.type.*func(*"".GuestStore, string) (*model.Guest, error)   €  "runtime.zerovalue    € ntype.func(*"".GuestStore, string) (*model.Guest, error)   Ğ  ntype.func(*"".GuestStore, string) (*model.Guest, error)   €  &type.*"".GuestStore     type.string      "type.*model.Guest   °  type.error   şègo.typelink.func(*store.GuestStore, string) (*model.Guest, error)	func(*"".GuestStore, string) (*model.Guest, error)              ntype.func(*"".GuestStore, string) (*model.Guest, error)   ş:go.string.hdr."[]model.Guest"                       2go.string."[]model.Guest"   ş2go.string."[]model.Guest"    []model.Guest  ş$type.[]model.Guest                   ˆ'nŸ                                                         0   runtime.algarray   @  "runtime.gcbits.01   P  :go.string.hdr."[]model.Guest"   p  6go.weak.type.*[]model.Guest   €  "runtime.zerovalue      type.model.Guest   şNgo.typelink.[]model.Guest	[]model.Guest              $type.[]model.Guest   ş|go.string.hdr."func(*store.GuestStore) ([]model.Guest, error)"             .          tgo.string."func(*store.GuestStore) ([]model.Guest, error)"   ştgo.string."func(*store.GuestStore) ([]model.Guest, error)" `  ^func(*store.GuestStore) ([]model.Guest, error)  ş`type.func(*"".GuestStore) ([]model.Guest, error) °  °              E’ 3                                                                                                                            0€  runtime.algarray   @  "runtime.gcbits.01   P  |go.string.hdr."func(*store.GuestStore) ([]model.Guest, error)"   p  rgo.weak.type.*func(*"".GuestStore) ([]model.Guest, error)   €  "runtime.zerovalue    € `type.func(*"".GuestStore) ([]model.Guest, error)   Ğ `type.func(*"".GuestStore) ([]model.Guest, error)   €  &type.*"".GuestStore     $type.[]model.Guest      type.error   şÌgo.typelink.func(*store.GuestStore) ([]model.Guest, error)	func(*"".GuestStore) ([]model.Guest, error)              `type.func(*"".GuestStore) ([]model.Guest, error)   ş†go.string.hdr."func(*store.GuestStore, string, *model.Guest) error"             3          ~go.string."func(*store.GuestStore, string, *model.Guest) error"   ş~go.string."func(*store.GuestStore, string, *model.Guest) error" p  hfunc(*store.GuestStore, string, *model.Guest) error  şjtype.func(*"".GuestStore, string, *model.Guest) error À  À              oº 3                                                                                                                                    0€  runtime.algarray   @  "runtime.gcbits.01   P  †go.string.hdr."func(*store.GuestStore, string, *model.Guest) error"   p  |go.weak.type.*func(*"".GuestStore, string, *model.Guest) error   €  "runtime.zerovalue    € jtype.func(*"".GuestStore, string, *model.Guest) error   Ğ° jtype.func(*"".GuestStore, string, *model.Guest) error   €  &type.*"".GuestStore     type.string      "type.*model.Guest   °  type.error   şàgo.typelink.func(*store.GuestStore, string, *model.Guest) error	func(*"".GuestStore, string, *model.Guest) error              jtype.func(*"".GuestStore, string, *model.Guest) error   ş,go.string.hdr."Create"                       $go.string."Create"   ş$go.string."Create"   Create  şPgo.string.hdr."func(*model.Guest) error"                       Hgo.string."func(*model.Guest) error"   şHgo.string."func(*model.Guest) error" @  2func(*model.Guest) error  ş:type.func(*model.Guest) error                   v~~x 3                                                                                                                    0€  runtime.algarray   @  "runtime.gcbits.01   P  Pgo.string.hdr."func(*model.Guest) error"   p  Lgo.weak.type.*func(*model.Guest) error   €  "runtime.zerovalue    € :type.func(*model.Guest) error   Ğ :type.func(*model.Guest) error   €  "type.*model.Guest     type.error   şzgo.typelink.func(*model.Guest) error	func(*model.Guest) error              :type.func(*model.Guest) error   ş,go.string.hdr."Delete"                       $go.string."Delete"   ş$go.string."Delete"   Delete  şDgo.string.hdr."func(string) error"                       <go.string."func(string) error"   ş<go.string."func(string) error" 0  &func(string) error  ş.type.func(string) error                   ŠB”h 3                                                                                                                    0€  runtime.algarray   @  "runtime.gcbits.01   P  Dgo.string.hdr."func(string) error"   p  @go.weak.type.*func(string) error   €  "runtime.zerovalue    € .type.func(string) error   Ğ .type.func(string) error   €  type.string     type.error   şbgo.typelink.func(string) error	func(string) error              .type.func(string) error   ş&go.string.hdr."Get"                       go.string."Get"   şgo.string."Get"   Get  şdgo.string.hdr."func(string) (*model.Guest, error)"             "          \go.string."func(string) (*model.Guest, error)"   ş\go.string."func(string) (*model.Guest, error)" P  Ffunc(string) (*model.Guest, error)  şNtype.func(string) (*model.Guest, error) °  °              MO- 3                                                                                                                            0€  runtime.algarray   @  "runtime.gcbits.01   P  dgo.string.hdr."func(string) (*model.Guest, error)"   p  `go.weak.type.*func(string) (*model.Guest, error)   €  "runtime.zerovalue    € Ntype.func(string) (*model.Guest, error)   Ğ Ntype.func(string) (*model.Guest, error)   €  type.string     "type.*model.Guest      type.error   ş¢go.typelink.func(string) (*model.Guest, error)	func(string) (*model.Guest, error)              Ntype.func(string) (*model.Guest, error)   ş(go.string.hdr."List"                        go.string."List"   ş go.string."List"   
+List  şZgo.string.hdr."func() ([]model.Guest, error)"                       Rgo.string."func() ([]model.Guest, error)"   şRgo.string."func() ([]model.Guest, error)" @  <func() ([]model.Guest, error)  şDtype.func() ([]model.Guest, error)                   ßÑà5 3                                                                                                                      0€  runtime.algarray   @  "runtime.gcbits.01   P  Zgo.string.hdr."func() ([]model.Guest, error)"   p  Vgo.weak.type.*func() ([]model.Guest, error)   €  "runtime.zerovalue    € Dtype.func() ([]model.Guest, error)   Ğ€ Dtype.func() ([]model.Guest, error)   €  $type.[]model.Guest     type.error   şgo.typelink.func() ([]model.Guest, error)	func() ([]model.Guest, error)              Dtype.func() ([]model.Guest, error)   ş,go.string.hdr."Update"                       $go.string."Update"   ş$go.string."Update"   Update  ş`go.string.hdr."func(string, *model.Guest) error"                        Xgo.string."func(string, *model.Guest) error"   şXgo.string."func(string, *model.Guest) error" P  Bfunc(string, *model.Guest) error  şJtype.func(string, *model.Guest) error °  °              8»Ñ§ 3                                                                                                                            0€  runtime.algarray   @  "runtime.gcbits.01   P  `go.string.hdr."func(string, *model.Guest) error"   p  \go.weak.type.*func(string, *model.Guest) error   €  "runtime.zerovalue    € Jtype.func(string, *model.Guest) error   Ğ  Jtype.func(string, *model.Guest) error   €  type.string     "type.*model.Guest      type.error   şšgo.typelink.func(string, *model.Guest) error	func(string, *model.Guest) error              Jtype.func(string, *model.Guest) error   ş&type.*"".GuestStore  Ğ  Ğ              øÎ 6                                                                                                                                                                                                                                                                                                                                              B0   runtime.algarray   @  "runtime.gcbits.01   P  Bgo.string.hdr."*store.GuestStore"   p  8go.weak.type.**"".GuestStore   €  "runtime.zerovalue     $type."".GuestStore   `  &type.*"".GuestStore   Àğ &type.*"".GuestStore   ğ  ,go.string.hdr."Create"     :type.func(*model.Guest) error      Ztype.func(*"".GuestStore, *model.Guest) error   °  ."".(*GuestStore).Create   À  ."".(*GuestStore).Create   Ğ  ,go.string.hdr."Delete"   ğ  .type.func(string) error   €  Ntype.func(*"".GuestStore, string) error     ."".(*GuestStore).Delete      ."".(*GuestStore).Delete   °  &go.string.hdr."Get"   Ğ  Ntype.func(string) (*model.Guest, error)   à  ntype.func(*"".GuestStore, string) (*model.Guest, error)   ğ  ("".(*GuestStore).Get   €  ("".(*GuestStore).Get     (go.string.hdr."List"   °  Dtype.func() ([]model.Guest, error)   À  `type.func(*"".GuestStore) ([]model.Guest, error)   Ğ  *"".(*GuestStore).List   à  *"".(*GuestStore).List   ğ  ,go.string.hdr."Update"     Jtype.func(string, *model.Guest) error      jtype.func(*"".GuestStore, string, *model.Guest) error   °  ."".(*GuestStore).Update   À  ."".(*GuestStore).Update   ş@go.string.hdr."store.GuestStore"                       8go.string."store.GuestStore"   ş8go.string."store.GuestStore" 0  "store.GuestStore  ş*go.string.hdr."mgoDB"                       "go.string."mgoDB"   ş"go.string."mgoDB"   mgoDB  ş*go.string.hdr."store"                       "go.string."store"   ş"go.string."store"   store  ş"go.importpath."".                       "go.string."store"   ş4go.string.hdr."GuestStore"             
+          ,go.string."GuestStore"   ş,go.string."GuestStore"    GuestStore  ş$type."".GuestStore  à  à              [a¥+ 9                                                                                                                                                      0   runtime.algarray   @  "runtime.gcbits.01   P  @go.string.hdr."store.GuestStore"   p  &type.*"".GuestStore   €  "runtime.zerovalue   À $type."".GuestStore   À  *go.string.hdr."mgoDB"   Ğ  "go.importpath."".   à  6type.*util/mongodb.Instance   ` $type."".GuestStore     4go.string.hdr."GuestStore"      "go.importpath."".   °à $type."".GuestStore   ş.go.string.hdr."[]uint8"                       &go.string."[]uint8"   ş&go.string."[]uint8"   []uint8  ştype.[]uint8                   ß~.8                                                         0   runtime.algarray   @  "runtime.gcbits.01   P  .go.string.hdr."[]uint8"   p  *go.weak.type.*[]uint8   €  "runtime.zerovalue     type.uint8   ş6go.typelink.[]uint8	[]uint8              type.[]uint8   şruntime.gcbits.      ş0go.string.hdr."[8]uint8"                       (go.string."[8]uint8"   ş(go.string."[8]uint8"    [8]uint8  ştype.[8]uint8 À  À               >ù0´ ‘                                                                       0   runtime.algarray   @  runtime.gcbits.   P  0go.string.hdr."[8]uint8"   p  ,go.weak.type.*[8]uint8   €  "runtime.zerovalue     type.uint8      type.[]uint8   ş:go.typelink.[8]uint8	[8]uint8              type.[8]uint8   ş0go.string.hdr."[]string"                       (go.string."[]string"   ş(go.string."[]string"    []string  ştype.[]string                   Ó¨ó
+                                                         0   runtime.algarray   @  "runtime.gcbits.01   P  0go.string.hdr."[]string"   p  ,go.weak.type.*[]string   €  "runtime.zerovalue     type.string   ş:go.typelink.[]string	[]string              type.[]string   şTgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb           şTgclocalsÂ·0b86ef39f3fed835f14ba5f4d7c62fa2             şTgclocalsÂ·a8eabfc4a4514ed6b3b0c61e9680e440              şTgclocalsÂ·3bb21ca8fe1d99a3e492463bd711418a             ş0type..hashfunc.[8]string              (type..hash.[8]string   ş,type..eqfunc.[8]string              $type..eq.[8]string   ş&type..alg.[8]string                        0type..hashfunc.[8]string     ,type..eqfunc.[8]string   ş&runtime.gcbits.5555   UU ş2go.string.hdr."[8]string"             	          *go.string."[8]string"   ş*go.string."[8]string"    [8]string  ştype.[8]string À  À€       x       USŒ>                                                                        0  &type..alg.[8]string   @  &runtime.gcbits.5555   P  2go.string.hdr."[8]string"   p  .go.weak.type.*[8]string   €  "runtime.zerovalue     type.string      type.[]string   ş>go.typelink.[8]string	[8]string              type.[8]string   şRgo.string.hdr."*map.bucket[string]string"                       Jgo.string."*map.bucket[string]string"   şJgo.string."*map.bucket[string]string" @  4*map.bucket[string]string  ş<type.*map.bucket[string]string                   ¦te 6                                                        0   runtime.algarray   @  "runtime.gcbits.01   P  Rgo.string.hdr."*map.bucket[string]string"   p  Ngo.weak.type.**map.bucket[string]string   €  "runtime.zerovalue     :type.map.bucket[string]string   ş2runtime.gcbits.aaaaaaaa02 
+  
+ªªªª şPgo.string.hdr."map.bucket[string]string"                       Hgo.string."map.bucket[string]string"   şHgo.string."map.bucket[string]string" @  2map.bucket[string]string  ş.go.string.hdr."topbits"                       &go.string."topbits"   ş&go.string."topbits"   topbits  ş(go.string.hdr."keys"                        go.string."keys"   ş go.string."keys"   
+keys  ş,go.string.hdr."values"                       $go.string."values"   ş$go.string."values"   values  ş0go.string.hdr."overflow"                       (go.string."overflow"   ş(go.string."overflow"    overflow  ş:type.map.bucket[string]string €  €            Ş>                                                                                                                                                                                      ˆ                                             0à  runtime.algarray   @  2runtime.gcbits.aaaaaaaa02   P  Pgo.string.hdr."map.bucket[string]string"   p  Lgo.weak.type.*map.bucket[string]string   €  "runtime.zerovalue   À :type.map.bucket[string]string   À  .go.string.hdr."topbits"   à  type.[8]uint8     (go.string.hdr."keys"   °  type.[8]string   à  ,go.string.hdr."values"   €  type.[8]string   °  0go.string.hdr."overflow"   Ğ  <type.*map.bucket[string]string   ş"runtime.gcbits.2c   , şJgo.string.hdr."map.hdr[string]string"                       Bgo.string."map.hdr[string]string"   şBgo.string."map.hdr[string]string" 0  ,map.hdr[string]string  ş*go.string.hdr."count"                       "go.string."count"   ş"go.string."count"   count  ş*go.string.hdr."flags"                       "go.string."flags"   ş"go.string."flags"   flags  ş"go.string.hdr."B"                       go.string."B"   şgo.string."B"   B  ş*go.string.hdr."hash0"                       "go.string."hash0"   ş"go.string."hash0"   hash0  ş.go.string.hdr."buckets"                       &go.string."buckets"   ş&go.string."buckets"   buckets  ş4go.string.hdr."oldbuckets"             
+          ,go.string."oldbuckets"   ş,go.string."oldbuckets"    oldbuckets  ş2go.string.hdr."nevacuate"             	          *go.string."nevacuate"   ş*go.string."nevacuate"    nevacuate  ş4type.map.hdr[string]string À  À0       0       Ïmlh                                                                                                                                                                                      	                                                                                                                                                                                                    (       ,0à  runtime.algarray   @  "runtime.gcbits.2c   P  Jgo.string.hdr."map.hdr[string]string"   p  Fgo.weak.type.*map.hdr[string]string   €  "runtime.zerovalue   À 4type.map.hdr[string]string   À  *go.string.hdr."count"   à  type.int     *go.string.hdr."flags"   °  type.uint8   à  "go.string.hdr."B"   €  type.uint8   °  *go.string.hdr."hash0"   Ğ  type.uint32   €  .go.string.hdr."buckets"      <type.*map.bucket[string]string   Ğ  4go.string.hdr."oldbuckets"   ğ  <type.*map.bucket[string]string      2go.string.hdr."nevacuate"   À  type.uintptr   ğ  0go.string.hdr."overflow"     &type.unsafe.Pointer   şBgo.string.hdr."map[string]string"                       :go.string."map[string]string"   ş:go.string."map[string]string" 0  $map[string]string  ş,type.map[string]string Ş  Ş              Y¡ç) 5                                                                                  0€  runtime.algarray   @  "runtime.gcbits.01   P  Bgo.string.hdr."map[string]string"   p  >go.weak.type.*map[string]string   €  "runtime.zerovalue     type.string      type.string   °  :type.map.bucket[string]string   À  4type.map.hdr[string]string   ş^go.typelink.map[string]string	map[string]string              ,type.map[string]string   ş<go.string.hdr."*[]model.Guest"                       4go.string."*[]model.Guest"   ş4go.string."*[]model.Guest"    *[]model.Guest  ş&type.*[]model.Guest                   P‘Cø 6                                                        0   runtime.algarray   @  "runtime.gcbits.01   P  <go.string.hdr."*[]model.Guest"   p  8go.weak.type.**[]model.Guest   €  "runtime.zerovalue     $type.[]model.Guest   ş"runtime.gcbits.03    ş8go.string.hdr."interface {}"                       0go.string."interface {}"   ş0go.string."interface {}"    interface {}  ş"type.interface {} À  À              çW                                                                          0€  runtime.algarray   @  "runtime.gcbits.03   P  8go.string.hdr."interface {}"   p  4go.weak.type.*interface {}   €  "runtime.zerovalue   À "type.interface {}   ş<go.string.hdr."[]interface {}"                       4go.string."[]interface {}"   ş4go.string."[]interface {}"    []interface {}  ş&type.[]interface {}                   p“ê/                                                         0   runtime.algarray   @  "runtime.gcbits.01   P  <go.string.hdr."[]interface {}"   p  8go.weak.type.*[]interface {}   €  "runtime.zerovalue     "type.interface {}   şRgo.typelink.[]interface {}	[]interface {}              &type.[]interface {}   şTgclocalsÂ·33cdeccccebe80329f1fdbee7f5874cb           şTgclocalsÂ·0b86ef39f3fed835f14ba5f4d7c62fa2             şTgclocalsÂ·a8eabfc4a4514ed6b3b0c61e9680e440              şTgclocalsÂ·3bb21ca8fe1d99a3e492463bd711418a             ş<type..hashfunc.[1]interface {}              4type..hash.[1]interface {}   ş8type..eqfunc.[1]interface {}              0type..eq.[1]interface {}   ş2type..alg.[1]interface {}                        <type..hashfunc.[1]interface {}     8type..eqfunc.[1]interface {}   ş>go.string.hdr."[1]interface {}"                       6go.string."[1]interface {}"   ş6go.string."[1]interface {}"     [1]interface {}  ş(type.[1]interface {} À  À              P‘[ú                                                                        0  2type..alg.[1]interface {}   @  "runtime.gcbits.03   P  >go.string.hdr."[1]interface {}"   p  :go.weak.type.*[1]interface {}   €  "runtime.zerovalue     "type.interface {}      &type.[]interface {}   şVgo.typelink.[1]interface {}	[1]interface {}              (type.[1]interface {}   ş@go.string.hdr."*[1]interface {}"                       8go.string."*[1]interface {}"   ş8go.string."*[1]interface {}" 0  "*[1]interface {}  ş*type.*[1]interface {}                   ¿¨5 6                                                        0   runtime.algarray   @  "runtime.gcbits.01   P  @go.string.hdr."*[1]interface {}"   p  <go.weak.type.**[1]interface {}   €  "runtime.zerovalue     (type.[1]interface {}   ş:go.string.hdr."**model.Guest"                       2go.string."**model.Guest"   ş2go.string."**model.Guest"    **model.Guest  ş$type.**model.Guest                   ­(i 6                                                        0   runtime.algarray   @  "runtime.gcbits.01   P  :go.string.hdr."**model.Guest"   p  6go.weak.type.***model.Guest   €  "runtime.zerovalue     "type.*model.Guest   ş4go.string.hdr."*[8]string"             
+          ,go.string."*[8]string"   ş,go.string."*[8]string"    *[8]string  ştype.*[8]string                   ­”o 6                                                        0   runtime.algarray   @  "runtime.gcbits.01   P  4go.string.hdr."*[8]string"   p  0go.weak.type.**[8]string   €  "runtime.zerovalue     type.[8]string   ş.go.string.hdr."runtime"                       &go.string."runtime"   ş&go.string."runtime"   runtime  ş,go.importpath.runtime.                       &go.string."runtime"   ş8go.string.hdr."util/mongodb"                       0go.string."util/mongodb"   ş0go.string."util/mongodb"    util/mongodb  ş6go.importpath.util/mongodb.                       0go.string."util/mongodb"   şHgo.string.hdr."gopkg.in/mgo.v2/bson"                       @go.string."gopkg.in/mgo.v2/bson"   ş@go.string."gopkg.in/mgo.v2/bson" 0  *gopkg.in/mgo.v2/bson  şFgo.importpath.gopkg.in/mgo.v2/bson.                       @go.string."gopkg.in/mgo.v2/bson"   ş2go.string.hdr."util/logs"             	          *go.string."util/logs"   ş*go.string."util/logs"    util/logs  ş0go.importpath.util/logs.             	          *go.string."util/logs"   ş*go.string.hdr."model"                       "go.string."model"   ş"go.string."model"   model  ş(go.importpath.model.                       "go.string."model"   ş.type..hash.[8]stringÂ·f              (type..hash.[8]string   ş*type..eq.[8]stringÂ·f              $type..eq.[8]string   ş:type..hash.[1]interface {}Â·f              4type..hash.[1]interface {}   ş6type..eq.[1]interface {}Â·f              0type..eq.[1]interface {}   ş"runtime.zerovalue      ÿÿgo13ld 
